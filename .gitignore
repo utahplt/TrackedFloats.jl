@@ -1,0 +1,10 @@
+*.txt
+.*/
+run*/
+*.dot
+*.gexf
+*.ps
+
+example/finch/LD_*
+example/finch/elasticitycode*
+/old_run_data/
