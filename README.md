@@ -1,8 +1,10 @@
 # FloatTracker.jl
 
-Track `NaN` generation and propogation in your code. 
+Track `NaN` generation and propagation in your code. 
 
 Inspired by [Sherlogs.jl](https://github.com/milankl/Sherlogs.jl).
+
+This repository originally lived in [Taylor Allred's repository](https://github.com/tcallred/FloatTracker.jl).
 
 # Examples
 
