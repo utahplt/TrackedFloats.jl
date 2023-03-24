@@ -8,7 +8,7 @@ This repository originally lived in [Taylor Allred's repository](https://github.
 
 # Examples
 
-Examples have been moved from this repository to an [example repository](https://github.com/ashton314/FloatTrackerExamples)—this allows us to keep the dependencies in this repository nice and light.
+Examples have been moved from this repository to an [example repository](https://github.com/utahplt/FloatTrackerExamples)—this allows us to keep the dependencies in this repository nice and light.
 
 # Description
 
