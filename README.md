@@ -17,9 +17,9 @@ These behave just like their `FloatN` counterparts except that they detect and l
 
 If a `NaN` appears in a primitive floating point operation (such as `+`, `-`, `abs`, `sin` etc.), it generates an event:
 
-- **GEN**: the operation generated a `NaN` as a result (eg. `0.0 / 0.0 -> NaN`)
-- **PROP**: the operation propogaded a `NaN` from its arguments (eg. `NaN + 2.0 -> NaN`)
-- **KILL**: the operation had a `NaN` in its arguments but not in its result (eg. `NaN > 1.0 -> false`)
+- **GEN**: the operation generated a `NaN` as a result (e.g. `0.0 / 0.0 -> NaN`)
+- **PROP**: the operation propagated a `NaN` from its arguments (e.g. `NaN + 2.0 -> NaN`)
+- **KILL**: the operation had a `NaN` in its arguments but not in its result (e.g. `NaN > 1.0 -> false`)
 
 These events are then stored in a buffered log and can be written out to a file during or after the execution of a program. 
 
@@ -97,7 +97,7 @@ PROP NaN,4.0 -> max -> NaN
 	foldl at reduce.jl:193 [inlined]
 	maximum2(lst::Vector{TrackedFloat16}) at max.jl:17
 ```
-This is an example of a program where two different implmentations can result in a different answer when dealing with `NaN` in the input. In a larger program, the presence of `NaN` can produce incorrect results. 
+This is an example of a program where two different implementations can result in a different answer when dealing with `NaN` in the input. In a larger program, the presence of `NaN` can produce incorrect results. 
 This tool may be useful for debugging those sorts of issues. 
 
 ## Known operations that can kill a NaN
