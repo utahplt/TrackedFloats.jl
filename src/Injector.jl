@@ -103,8 +103,23 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
 
   # First check the functions set: the head of the stack trace should all be in
   # the file in question; somewhere in that set should be function specified.
-  interested_files = map((refs -> refs.file), i.functions)
-  in_file_frame_head = Iterators.takewhile((frame -> frame_file(frame) in interested_files), frames)
+  if !isempty(i.functions)
+    interested_files = map((refs -> refs.file), i.functions)
+    in_file_frame_head = Iterators.takewhile((frame -> frame_file(frame) in interested_files), frames)
+    if any((frame -> FunctionRef(frame.func, frame_file(frame)) in i.functions), in_file_frame_head)
+      return true
+    end
+  end
+
+  # Next check the library set: if we're inside a library, go ahead and inject
+  if !isempty(i.libraries)
+    if frame_library(frames[1]) in i.libraries
+      return true
+    end
+  end
+
+  # Default: don't inject
+  return false
 end
 
 function frame_file(frame)::Symbol
