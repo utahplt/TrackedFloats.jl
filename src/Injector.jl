@@ -1,4 +1,6 @@
+using Core: StackTrace
 using Base.StackTraces
+using Base.Iterators
 
 struct FunctionRef
   name::Symbol
@@ -20,12 +22,19 @@ Struct describing parameters for injecting NaNs
 
  - `functions:Array{FunctionRef}` if given, only inject NaNs when within these
    functions; default is to not discriminate on functions
+
+ - `libraries:Array{String}` if given, only inject NaNs when within this library.
+
+`functions` and `libraries` work together as a union: i.e. the set of possible NaN
+injection points is a union of the places matched by `functions` and `libraries`.
+
 """
 mutable struct Injector
   active::Bool
   odds::Int
   ninject::Int
   functions::Array{FunctionRef}
+  libraries::Array{String}
 end
 
 """
@@ -66,7 +75,7 @@ function should_inject(i::Injector)::Bool
       any(in_functions, stacktrace())
     end
 
-    return roll == 1 && in_right_fn
+    return roll == 1 && injectable_region(i, stacktrace())
   end
 
   return false
@@ -74,4 +83,48 @@ end
 
 function decrement_injections(i::Injector)
   i.ninject = i.ninject - 1
+end
+
+"""
+    injectable_region(i::Injector, frames::StackTrace)::Bool
+
+Returns whether or not the current point in the code (indicated by the
+StackTrace) is a valid point to inject a NaN.
+"""
+function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Bool
+  # Drop FloatTracker frames
+  frames = filter((frame -> frame_library(frame) != "FloatTracker"), raw_frames)
+
+  # If neither functions nor libraries are specified, inject as long as we're
+  # not inside the standard library.
+  if isempty(i.functions) && isempty(i.libraries) && frame_library(frames[1]) !== nothing
+    return true
+  end
+
+  # First check the functions set: the head of the stack trace should all be in
+  # the file in question; somewhere in that set should be function specified.
+  interested_files = map((refs -> refs.file), i.functions)
+  in_file_frame_head = Iterators.takewhile((frame -> frame_file(frame) in interested_files), frames)
+end
+
+function frame_file(frame)::Symbol
+  return Symbol(split(String(frame.file), ['/', '\\'])[end])
+end
+
+"""
+    frame_library(frame::StackTraces.StackFrame)::Symbol
+
+Return the name of the library that the current stack frame references.
+
+Returns `nothing` if unable to find library.
+"""
+function frame_library(frame::StackTraces.StackFrame)::Symbol
+  # FIXME: this doesn't work with packages that are checked out locally
+  lib = match(r".julia[\\/](packages|dev)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", frame.file)
+
+  if lib === nothing
+    return nothing
+  else
+    return Symbol(lib.captures[2])
+  end
 end
