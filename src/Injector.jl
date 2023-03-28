@@ -1,4 +1,3 @@
-using Core: StackTrace
 using Base.StackTraces
 using Base.Iterators
 
@@ -48,34 +47,18 @@ Decision process:
 
  - Checks that there are some NaNs remaining to inject.
 
- - Checks that we're inside the scope of a function in `Injector.functions`.
-   (Vacuously true if no functions given.)
-
- - Rolls an `Injector.odds`-sided die; if 1, inject a NaN, otherwise, don't do
+ - Rolls an `Injector.odds`-sided die; if 1, proceed, otherwise, don't do
    anything.
+
+ - Checks that we're inside the scope of a function in `Injector.functions` OR
+   that we're in a library that we're interested in. If yes, inject.
+
+ - Defaults to not injecting.
+
 """
 function should_inject(i::Injector)::Bool
-  if i.active && i.ninject > 0
-    roll = rand(1:i.odds)
-
-    if roll != 1
-      return false
-    end
-
-    in_right_fn::Bool = if isempty(i.functions)
-      true
-    else
-      in_functions = function (frame::StackTraces.StackFrame)
-        file = Symbol(split(String(frame.file), ['/', '\\'])[end])
-        fr = FunctionRef(frame.func, file)
-        fr in i.functions
-      end
-      # TODO: check the head of the stacktrace to make sure it's all our files or standard library files
-      # in_functions(stacktrace()[1])
-      any(in_functions, stacktrace())
-    end
-
-    return roll == 1 && injectable_region(i, stacktrace())
+  if i.active && i.ninject > 0 && rand(1:i.odds) == 1
+    return injectable_region(i, stacktrace())
   end
 
   return false
@@ -111,7 +94,8 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
     end
   end
 
-  # Next check the library set: if we're inside a library, go ahead and inject
+  # Next check the library set: if we're inside a library that we're interested
+  # in, go ahead and inject
   if !isempty(i.libraries)
     if frame_library(frames[1]) in i.libraries
       return true
