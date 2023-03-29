@@ -113,6 +113,23 @@ NaN ^  0.0 → 1.0
 
 Most of the time comparison operators are what kill a NaN. But `^` can kill NaNs too.
 
+# Running tests
+
+You can run tests one of two ways:
+
+```
+$ julia --project=. tests/runtests.jl
+```
+
+or via the Julia shell:
+
+```
+julia> ]             # enter the package shell
+pkg> activate .
+(FloatTracker) pkg> test
+```
+
+
 # License
 
 MIT License
