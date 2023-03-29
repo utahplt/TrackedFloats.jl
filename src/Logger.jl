@@ -18,8 +18,8 @@ end
 logger = Logger([])
 
 function set_logger(; filename="default", buffersize=5, print=false, cstg=false, cstgLineNum=true, cstgArgs=true)
-  time = now().instant.periods.value % 99999999
-  log_config.filename = "$(filename)_$(time)"
+  now_str = Dates.format(now(), "yyyymmddHHMMss")
+  log_config.filename = "$(now_str)-$(filename)"
   log_config.buffersize = buffersize
   log_config.printToStdOut = print
   log_config.outputCSTG = cstg
