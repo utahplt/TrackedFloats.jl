@@ -90,7 +90,6 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
     interested_files = map((refs -> refs.file), i.functions)
     in_file_frame_head = Iterators.takewhile((frame -> frame_file(frame) in interested_files), frames)
     if any((frame -> FunctionRef(frame.func, frame_file(frame)) in i.functions), in_file_frame_head)
-      println("Function/file match!")
       return true
     end
   end
@@ -98,11 +97,7 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
   # Next check the library set: if we're inside a library that we're interested
   # in, go ahead and inject
   if !isempty(i.libraries)
-    print(frame_library(frames[1]))
-    print(" ← ")
-    println(frames[1].file)
     if frame_library(frames[1]) in i.libraries
-      println("Library matches!")
       return true
     end
   end
