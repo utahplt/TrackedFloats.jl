@@ -58,7 +58,6 @@ Decision process:
 """
 function should_inject(i::Injector)::Bool
   if i.active && i.ninject > 0 && rand(1:i.odds) == 1
-    println("I am able to inject; checking region...")
     return injectable_region(i, stacktrace())
   end
 
@@ -77,12 +76,11 @@ StackTrace) is a valid point to inject a NaN.
 """
 function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Bool
   # Drop FloatTracker frames
-  frames = collect(Iterators.dropwhile((frame -> frame_library(frame) != "FloatTracker"), raw_frames))
+  frames = collect(Iterators.dropwhile((frame -> frame_library(frame) == "FloatTracker"), raw_frames))
 
   # If neither functions nor libraries are specified, inject as long as we're
   # not inside the standard library.
   if isempty(i.functions) && isempty(i.libraries) && frame_library(frames[1]) !== nothing
-    println("No stipulations; good to inject")
     return true
   end
 
@@ -100,6 +98,9 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
   # Next check the library set: if we're inside a library that we're interested
   # in, go ahead and inject
   if !isempty(i.libraries)
+    print(frame_library(frames[1]))
+    print(" ← ")
+    println(frames[1].file)
     if frame_library(frames[1]) in i.libraries
       println("Library matches!")
       return true
@@ -107,7 +108,6 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
   end
 
   # Default: don't inject
-  println("Nothing matches; not injecting")
   return false
 end
 
