@@ -58,6 +58,7 @@ Decision process:
 """
 function should_inject(i::Injector)::Bool
   if i.active && i.ninject > 0 && rand(1:i.odds) == 1
+    println("I am able to inject; checking region...")
     return injectable_region(i, stacktrace())
   end
 
@@ -76,11 +77,12 @@ StackTrace) is a valid point to inject a NaN.
 """
 function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Bool
   # Drop FloatTracker frames
-  frames = filter((frame -> frame_library(frame) != "FloatTracker"), raw_frames)
+  frames = collect(Iterators.dropwhile((frame -> frame_library(frame) != "FloatTracker"), raw_frames))
 
   # If neither functions nor libraries are specified, inject as long as we're
   # not inside the standard library.
   if isempty(i.functions) && isempty(i.libraries) && frame_library(frames[1]) !== nothing
+    println("No stipulations; good to inject")
     return true
   end
 
@@ -90,6 +92,7 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
     interested_files = map((refs -> refs.file), i.functions)
     in_file_frame_head = Iterators.takewhile((frame -> frame_file(frame) in interested_files), frames)
     if any((frame -> FunctionRef(frame.func, frame_file(frame)) in i.functions), in_file_frame_head)
+      println("Function/file match!")
       return true
     end
   end
@@ -98,11 +101,13 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
   # in, go ahead and inject
   if !isempty(i.libraries)
     if frame_library(frames[1]) in i.libraries
+      println("Library matches!")
       return true
     end
   end
 
   # Default: don't inject
+  println("Nothing matches; not injecting")
   return false
 end
 
@@ -117,13 +122,13 @@ Return the name of the library that the current stack frame references.
 
 Returns `nothing` if unable to find library.
 """
-function frame_library(frame::StackTraces.StackFrame)::Symbol
+function frame_library(frame::StackTraces.StackFrame) # ::Union{String,Nothing}
   # FIXME: this doesn't work with packages that are checked out locally
-  lib = match(r".julia[\\/](packages|dev)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", frame.file)
+  lib = match(r".julia[\\/](packages|dev)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", String(frame.file))
 
   if lib === nothing
     return nothing
   else
-    return Symbol(lib.captures[2])
+    return lib.captures[2]
   end
 end
