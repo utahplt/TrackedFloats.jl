@@ -67,7 +67,6 @@ function format_cstg_stackframe(sf::StackTraces.StackFrame)
     return "$(sf)"
   end
   func = String(sf.func)
-  file = split(String(sf.file), ['/', '\\'])[end]
   linfo = "$(sf.linfo)"
   args = if log_config.cstgArgs
     "($(split(linfo, '(')[end])"
@@ -80,7 +79,7 @@ function format_cstg_stackframe(sf::StackTraces.StackFrame)
     ""
   end
 
-  "$(func)$(args) at $(file)$(linenum)"
+  "$(func)$(args) at $(sf.file)$(linenum)"
 end
 
 function write_events(file, events)
