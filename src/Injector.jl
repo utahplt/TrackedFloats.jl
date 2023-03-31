@@ -6,6 +6,11 @@ struct FunctionRef
   file::Symbol
 end
 
+struct ReplayPoint
+  counter::Int64
+  check::String
+end
+
 """
 Struct describing parameters for injecting NaNs
 
@@ -19,10 +24,16 @@ Struct describing parameters for injecting NaNs
  - `odds::Int` inject a NaN with 1:odds probability—higher value → rarer to
    inject
 
- - `functions:Array{FunctionRef}` if given, only inject NaNs when within these
+ - `functions::Array{FunctionRef}` if given, only inject NaNs when within these
    functions; default is to not discriminate on functions
 
- - `libraries:Array{String}` if given, only inject NaNs when within this library.
+ - `libraries::Array{String}` if given, only inject NaNs when within this library.
+
+ - `record::String` if given, record injection invents in a way that can be
+   replayed later with the `replay` argument.
+
+ - `replay::String` if given, ignore all previous directives and use this file
+   for injection replay.
 
 `functions` and `libraries` work together as a union: i.e. the set of possible NaN
 injection points is a union of the places matched by `functions` and `libraries`.
@@ -30,10 +41,19 @@ injection points is a union of the places matched by `functions` and `libraries`
 """
 mutable struct Injector
   active::Bool
-  odds::Int
-  ninject::Int
+  odds::Int64
+  ninject::Int64
   functions::Array{FunctionRef}
   libraries::Array{String}
+  replay::String
+
+  # private fields
+  place_counter::Int64
+  replay_script::Array{ReplayPoint}
+end
+
+function make_injector(should_inject::Bool=false, odds::Int64=10, n_inject::Int64=1, functions=[], libraries=[], replay="")
+  return Injector(should_inject, odds, n_inject, functions, libraries, replay, 0, [])
 end
 
 """
@@ -57,6 +77,21 @@ Decision process:
 
 """
 function should_inject(i::Injector)::Bool
+  i.place_counter += 1
+
+  # Are we replaying a recording?
+  if i.replay !== ""
+    # Look to see if our list of events is triggered
+    if i.place_counter == i.replay_script[1].counter
+      # sanity check
+      if frame_file(drop_ft_frames(stacktrace())[1]) == i.replay_script[1].check
+        return true
+      end
+    else
+      return false
+    end
+  end
+
   if i.active && i.ninject > 0 && rand(1:i.odds) == 1
     return injectable_region(i, stacktrace())
   end
@@ -64,8 +99,12 @@ function should_inject(i::Injector)::Bool
   return false
 end
 
-function decrement_injections(i::Injector)
+@inline function decrement_injections(i::Injector)
   i.ninject = i.ninject - 1
+end
+
+@inline function drop_ft_frames(frames)
+  collect(Iterators.dropwhile((frame -> frame_library(frame) == "FloatTracker"), frames))
 end
 
 """
@@ -76,7 +115,7 @@ StackTrace) is a valid point to inject a NaN.
 """
 function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Bool
   # Drop FloatTracker frames
-  frames = collect(Iterators.dropwhile((frame -> frame_library(frame) == "FloatTracker"), raw_frames))
+  frames = drop_ft_frames(raw_frames)
 
   # If neither functions nor libraries are specified, inject as long as we're
   # not inside the standard library.
