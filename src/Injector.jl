@@ -8,7 +8,7 @@ end
 
 struct ReplayPoint
   counter::Int64
-  check::String
+  check::Symbol
 end
 
 """
@@ -46,14 +46,38 @@ mutable struct Injector
   functions::Array{FunctionRef}
   libraries::Array{String}
   replay::String
+  record::String
 
   # private fields
   place_counter::Int64
   replay_script::Array{ReplayPoint}
+  replay_head::Int64
 end
 
-function make_injector(should_inject::Bool=false, odds::Int64=10, n_inject::Int64=1, functions=[], libraries=[], replay="")
-  return Injector(should_inject, odds, n_inject, functions, libraries, replay, 0, [])
+function make_injector(; should_inject::Bool=true, odds::Int64=10, n_inject::Int64=1, functions=[], libraries=[], replay="", record="")
+  script =
+    if replay !== ""
+      parse_replay_file(replay)
+    else
+      []
+    end
+  println(script)
+  return Injector(should_inject, odds, n_inject, functions, libraries, replay, record, 0, script, 1)
+end
+
+function parse_replay_file(replay::String)::Array{ReplayPoint}
+  # println("replay: $replay")
+  # for l in readlines(replay)
+  #   println("line: '$l'")
+  #   println("parse: $(parse_replay_line(l))")
+  # end
+  # println("replay: done")
+  return [parse_replay_line(l) for l in readlines(replay)]
+end
+
+function parse_replay_line(line::String)::ReplayPoint
+  m = match(r"^(\d+), (.*)$", line)
+  return ReplayPoint(parse(Int64, m.captures[1]), Symbol(m.captures[2]))
 end
 
 """
@@ -81,19 +105,39 @@ function should_inject(i::Injector)::Bool
 
   # Are we replaying a recording?
   if i.replay !== ""
-    # Look to see if our list of events is triggered
-    if i.place_counter == i.replay_script[1].counter
-      # sanity check
-      if frame_file(drop_ft_frames(stacktrace())[1]) == i.replay_script[1].check
-        return true
-      end
-    else
-      return false
+    println("Replaying: place: $(i.place_counter); head: $(i.replay_head) next: $(i.replay_script[i.replay_head])")
+    if i.place_counter == i.replay_script[i.replay_head].counter
+      now = frame_file(drop_ft_frames(stacktrace())[1])
+      ck  = i.replay_script[i.replay_head].check
+      println("   counter match; file: '$now' check: '$ck'")
+      println("   run check: $(now === ck)")
     end
+    # Look to see if our list of events is triggered
+    go = i.place_counter === i.replay_script[i.replay_head].counter && frame_file(drop_ft_frames(stacktrace())[1]) === i.replay_script[i.replay_head].check
+
+    println("go? $go")
+
+    if go
+      i.replay_head += 1
+    end
+
+    return go
   end
 
   if i.active && i.ninject > 0 && rand(1:i.odds) == 1
-    return injectable_region(i, stacktrace())
+    println("hit odds")
+    if i.record !== ""
+      # We're recording this
+      did_injectp = injectable_region(i, stacktrace())
+      if did_injectp
+        fh = open(i.record, "a")
+        println(fh, "$(i.place_counter), $(frame_file(drop_ft_frames(stacktrace())[1]))")
+        close(fh)
+      end
+      return did_injectp
+    else
+      return injectable_region(i, stacktrace())
+    end
   end
 
   return false
@@ -120,6 +164,7 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
   # If neither functions nor libraries are specified, inject as long as we're
   # not inside the standard library.
   if isempty(i.functions) && isempty(i.libraries) && frame_library(frames[1]) !== nothing
+    println("no constraints on region")
     return true
   end
 
@@ -155,10 +200,13 @@ end
 Return the name of the library that the current stack frame references.
 
 Returns `nothing` if unable to find library.
+
+This is a hacky routine. Note that if we're inside of a "scratch space" (i.e.
+while testing) then this returns the name name of the scratch space.
 """
 function frame_library(frame::StackTraces.StackFrame) # ::Union{String,Nothing}
   # FIXME: this doesn't work with packages that are checked out locally
-  lib = match(r".julia[\\/](packages|dev)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", String(frame.file))
+  lib = match(r".julia[\\/](packages|dev|scratchspaces)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", String(frame.file))
 
   if lib === nothing
     return nothing

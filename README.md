@@ -118,7 +118,7 @@ Most of the time comparison operators are what kill a NaN. But `^` can kill NaNs
 You can run tests one of two ways:
 
 ```
-$ julia --project=. tests/runtests.jl
+$ julia --project=. test/runtests.jl
 ```
 
 or via the Julia shell:

@@ -1,6 +1,6 @@
 abstract type AbstractTrackedFloat <: AbstractFloat end
 
-injector = make_injector(false, 0, 0, [], [])
+injector = make_injector(should_inject=false, odds=0, n_inject=0)
 
 function set_inject_nan(should_inject::Bool, odds::Int = 10, n_inject = 1, functions = [], libraries = [])
   injector.active = should_inject
