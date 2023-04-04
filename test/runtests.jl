@@ -1,7 +1,5 @@
 using Test
 
-@testset "smoke tests" begin
-  @test true
-end
+println("injector tests")
 
 include("injector_tests.jl")

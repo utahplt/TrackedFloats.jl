@@ -61,17 +61,10 @@ function make_injector(; should_inject::Bool=true, odds::Int64=10, n_inject::Int
     else
       []
     end
-  println(script)
   return Injector(should_inject, odds, n_inject, functions, libraries, replay, record, 0, script, 1)
 end
 
 function parse_replay_file(replay::String)::Array{ReplayPoint}
-  # println("replay: $replay")
-  # for l in readlines(replay)
-  #   println("line: '$l'")
-  #   println("parse: $(parse_replay_line(l))")
-  # end
-  # println("replay: done")
   return [parse_replay_line(l) for l in readlines(replay)]
 end
 
@@ -98,34 +91,16 @@ Decision process:
    that we're in a library that we're interested in. If yes, inject.
 
  - Defaults to not injecting.
-
 """
 function should_inject(i::Injector)::Bool
   i.place_counter += 1
 
   # Are we replaying a recording?
   if i.replay !== ""
-    println("Replaying: place: $(i.place_counter); head: $(i.replay_head) next: $(i.replay_script[i.replay_head])")
-    if i.place_counter == i.replay_script[i.replay_head].counter
-      now = frame_file(drop_ft_frames(stacktrace())[1])
-      ck  = i.replay_script[i.replay_head].check
-      println("   counter match; file: '$now' check: '$ck'")
-      println("   run check: $(now === ck)")
-    end
-    # Look to see if our list of events is triggered
-    go = i.place_counter === i.replay_script[i.replay_head].counter && frame_file(drop_ft_frames(stacktrace())[1]) === i.replay_script[i.replay_head].check
-
-    println("go? $go")
-
-    if go
-      i.replay_head += 1
-    end
-
-    return go
+    return handle_replay(i)
   end
 
   if i.active && i.ninject > 0 && rand(1:i.odds) == 1
-    println("hit odds")
     if i.record !== ""
       # We're recording this
       did_injectp = injectable_region(i, stacktrace())
@@ -136,12 +111,28 @@ function should_inject(i::Injector)::Bool
       end
       return did_injectp
     else
-      # println("defer to injectable_region")
       return injectable_region(i, stacktrace())
     end
   end
 
-  println("nope way")
+  return false
+end
+
+function handle_replay(i::Injector)::Bool
+  script = i.replay_script
+  head = i.replay_head
+  place = i.place_counter
+
+  # End of recording?
+  if length(script) < head
+    return false
+  end
+
+  # Match?
+  if place === script[head].counter && frame_file(drop_ft_frames(stacktrace())[1]) === script[head].check
+    i.replay_head += 1
+    return true
+  end
   return false
 end
 
@@ -191,6 +182,12 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
   return false
 end
 
+getmodule(_) = nothing
+getmodule(x::Base.StackTraces.StackFrame) = getmodule(x.linfo)
+getmodule(x::Core.MethodInstance) = getmodule(x.def)
+getmodule(x::Core.Method) = "$(x.module)"
+getmodule(x::Core.Module) = "$x"
+
 function frame_file(frame)::Symbol
   return Symbol(split(String(frame.file), ['/', '\\'])[end])
 end
@@ -201,17 +198,7 @@ end
 Return the name of the library that the current stack frame references.
 
 Returns `nothing` if unable to find library.
-
-This is a hacky routine. Note that if we're inside of a "scratch space" (i.e.
-while testing) then this returns the name name of the scratch space.
 """
 function frame_library(frame::StackTraces.StackFrame) # ::Union{String,Nothing}
-  # FIXME: this doesn't work with packages that are checked out locally
-  lib = match(r".julia[\\/](packages|dev|scratchspaces)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", String(frame.file))
-
-  if lib === nothing
-    return nothing
-  else
-    return lib.captures[2]
-  end
+  return getmodule(frame)
 end
