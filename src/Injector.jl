@@ -136,10 +136,12 @@ function should_inject(i::Injector)::Bool
       end
       return did_injectp
     else
+      # println("defer to injectable_region")
       return injectable_region(i, stacktrace())
     end
   end
 
+  println("nope way")
   return false
 end
 
@@ -164,7 +166,6 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
   # If neither functions nor libraries are specified, inject as long as we're
   # not inside the standard library.
   if isempty(i.functions) && isempty(i.libraries) && frame_library(frames[1]) !== nothing
-    println("no constraints on region")
     return true
   end
 
