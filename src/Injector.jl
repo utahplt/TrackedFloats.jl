@@ -141,7 +141,7 @@ end
 end
 
 @inline function drop_ft_frames(frames)
-  collect(Iterators.dropwhile((frame -> frame_library(frame) == "FloatTracker"), frames))
+  collect(Iterators.dropwhile((frame -> frame_library(frame) === "FloatTracker"), frames))
 end
 
 """
@@ -200,5 +200,17 @@ Return the name of the library that the current stack frame references.
 Returns `nothing` if unable to find library.
 """
 function frame_library(frame::StackTraces.StackFrame) # ::Union{String,Nothing}
-  return getmodule(frame)
+  # first try from a data structure; if that doesn't work use the hacky string-based method that can work for inlined functions.
+  name = getmodule(frame)
+  if isnothing(name)
+    # FIXME: this doesn't work with packages that are checked out locally
+    lib = match(r".julia[\\/](packages|dev|scratchspaces)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", String(frame.file))
+
+    if isnothing(lib)
+      return nothing
+    else
+      return "$(lib.captures[2])"
+    end
+  end
+  return "$name"
 end
