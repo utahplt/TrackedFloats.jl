@@ -128,11 +128,19 @@ function handle_replay(i::Injector)::Bool
     return false
   end
 
+  ff = frame_file(drop_ft_frames(stacktrace())[1])
+
   # Match?
-  if place === script[head].counter && frame_file(drop_ft_frames(stacktrace())[1]) === script[head].check
+  if place === script[head].counter && ff === script[head].check
     i.replay_head += 1
+    println("Injecting NaN from replay point $place; file $(script[head].check)")
     return true
+  elseif place === script[head].counter && ff !== script[head].check
+    @error "At replay point $place but current file $ff ≠ $(script[head].check)"
+  elseif place > script[head].counter
+    @error "Replay point skipped"
   end
+
   return false
 end
 
