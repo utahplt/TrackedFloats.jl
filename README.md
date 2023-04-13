@@ -113,6 +113,16 @@ NaN ^  0.0 → 1.0
 
 Most of the time comparison operators are what kill a NaN. But `^` can kill NaNs too.
 
+# Generating CSTGs
+
+Get the [CSTG](https://github.com/utahplt/cstg) code.
+
+Once you've run a program (e.g. from the [example repository](https://github.com/utahplt/FloatTrackerExamples)) you can generate a graph like so:
+
+```
+./path/to/tracerSum trace_path_file.txt output_basename
+```
+
 # Running tests
 
 You can run tests one of two ways:
