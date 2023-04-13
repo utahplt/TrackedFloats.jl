@@ -117,11 +117,18 @@ Most of the time comparison operators are what kill a NaN. But `^` can kill NaNs
 
 Get the [CSTG](https://github.com/utahplt/cstg) code.
 
-Once you've run a program (e.g. from the [example repository](https://github.com/utahplt/FloatTrackerExamples)) you can generate a graph like so:
+Run a program that uses TrackedFloats (e.g. from the [example repository](https://github.com/utahplt/FloatTrackerExamples)).
+By default, a file with `*error_log*` in its name should appear.
+
+Generate a graph using the error log:
 
 ```
-./path/to/tracerSum trace_path_file.txt output_basename
+./path/to/tracerSum *-program_error_log.txt output_basename
+# prints many lines to stdout
 ```
+
+Open `output_basename.pdf` to see the CSTG.
+
 
 # Running tests
 
