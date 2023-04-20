@@ -23,9 +23,9 @@ struct Event
   trace::StackTraces.StackTrace
 end
 
-exclude_stacktrace = []
+exclude_stacktrace = [:prop]
 
-function set_exclude_stacktrace(exclusions = [])
+function set_exclude_stacktrace(exclusions = [:prop])
   global exclude_stacktrace = exclusions
 end
 
