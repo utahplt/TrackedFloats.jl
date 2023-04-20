@@ -101,17 +101,18 @@ function should_inject(i::Injector)::Bool
   end
 
   if i.active && i.ninject > 0 && rand(1:i.odds) == 1
+    st = stacktrace()
     if i.record !== ""
       # We're recording this
-      did_injectp = injectable_region(i, stacktrace())
+      did_injectp = injectable_region(i, st)
       if did_injectp
         fh = open(i.record, "a")
-        println(fh, "$(i.place_counter), $(frame_file(drop_ft_frames(stacktrace())[1]))")
+        println(fh, "$(i.place_counter), $(frame_file(drop_ft_frames(st)[1]))")
         close(fh)
       end
       return did_injectp
     else
-      return injectable_region(i, stacktrace())
+      return injectable_region(i, st)
     end
   end
 
