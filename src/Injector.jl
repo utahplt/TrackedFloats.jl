@@ -223,3 +223,9 @@ function frame_library(frame::StackTraces.StackFrame) # ::Union{String,Nothing}
   end
   return "$name"
 end
+
+function pp_frames(frames::StackTraces.StackTrace)
+  for f::StackTraces.StackFrame in frames
+    println("$(f.func) at $(f.file):$(f.line)")
+  end
+end
