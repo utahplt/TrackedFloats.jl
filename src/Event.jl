@@ -1,4 +1,3 @@
-
 @inline function isfloaterror(x)
   x isa AbstractFloat && isnan(x)
 end
@@ -25,6 +24,14 @@ end
 
 exclude_stacktrace = [:prop]
 
+"""
+    set_exclude_stacktrace(exclusions = [:prop])
+
+Set the types of stack traces to not collect.
+
+See documentation for the `event()` function for details on the types of events
+that can be put into this list.
+"""
 function set_exclude_stacktrace(exclusions = [:prop])
   global exclude_stacktrace = exclusions
 end
@@ -32,7 +39,15 @@ end
 """
     event(op, args, result, is_injected = false)
 
-Construct an `Event` struct
+Construct an `Event` struct.
+
+Uses the argument values and the return result to determine what kind of an
+event we're looking at here. Types:
+
+ - `:injected` --- injections
+ - `:gen`      --- generating operations
+ - `:prop`     --- NaN propagation
+ - `:kill`     --- killing operations
 """
 function event(op, args, result, is_injected = false) :: Event
   evt_type =
