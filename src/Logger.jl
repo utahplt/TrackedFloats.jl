@@ -52,6 +52,11 @@ function print_log()
   end
 end
 
+"""
+    write_log_to_file()
+
+Flush output logs.
+"""
 function write_log_to_file()
   if length(logger.events) > 0
     open("$(log_config.filename)_error_log.txt", "a") do file
