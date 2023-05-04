@@ -186,7 +186,9 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
   if !isempty(i.functions)
     interested_files = map((refs -> refs.file), i.functions)
     in_file_frame_head = Iterators.takewhile((frame -> frame_file(frame) in interested_files), frames)
-    # If `avoid` has been set, this will fail
+    if any((frame -> FunctionRef(frame.func, frame_file(frame), true) in i.functions), in_file_frame_head)
+      return false
+    end
     if any((frame -> FunctionRef(frame.func, frame_file(frame)) in i.functions), in_file_frame_head)
       return true
     end
