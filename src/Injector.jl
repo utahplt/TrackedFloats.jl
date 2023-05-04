@@ -1,10 +1,22 @@
 using Base.StackTraces
 using Base.Iterators
 
+"""
+Struct to describe a function location; used by the Injector
+
+The `avoid` field defaults to `false`—setting this to `true` will make it so
+that if that function will *not* be considered a candidate for injection.
+"""
 struct FunctionRef
   name::Symbol
   file::Symbol
+  avoid::Bool
 end
+
+# Convenience functions to make constructing these a little simpler
+FunctionRef(name, file) = FunctionRef(name, file, false)
+FunctionRef(name :: String, file, avoid) = FunctionRef(Symbol(name), file, avoid)
+FunctionRef(name :: Symbol, file :: String, avoid) = FunctionRef(name, Symbol(file), avoid)
 
 struct ReplayPoint
   counter::Int64
@@ -174,6 +186,7 @@ function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Boo
   if !isempty(i.functions)
     interested_files = map((refs -> refs.file), i.functions)
     in_file_frame_head = Iterators.takewhile((frame -> frame_file(frame) in interested_files), frames)
+    # If `avoid` has been set, this will fail
     if any((frame -> FunctionRef(frame.func, frame_file(frame)) in i.functions), in_file_frame_head)
       return true
     end
