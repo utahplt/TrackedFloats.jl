@@ -113,6 +113,32 @@ NaN ^  0.0 → 1.0
 
 Most of the time comparison operators are what kill a NaN. But `^` can kill NaNs too.
 
+# Recording NaN injections
+
+FloatTracker allows you to fuzz code and inject NaNs wherever a `TrackedFloat` type is used. Moreover, you can record these injections to rerun injections.
+
+**ACHTUNG:** it is critical that inputs to the program be exactly the same for recording and replaying to be consistent. The recordings are sensitive to the number of times a floating point operation is hit.
+
+**TODO:** describe how to set up a recording and replay it.
+
+## Recording sessions
+
+Sometimes we want to inject NaNs throughout the program. We can create a "recording session" that will before each injection check if that point has been tried before. If it has, we move on and try again at the next injection point.
+
+We can tell FloatTracker what we consider to be identical injection points. **TODO:** how *do* we tell FloatTracker what we consider to be the same and not the same? Function boundaries?
+
+## Recording internals
+
+During recording and replaying, we increment a counter each time a floating point operation happens. This doesn't add much overhead [*citation needed*] since we're already intercepting each of the floating point calls anyway—but it explains why we need to make sure our programs are deterministic before recording and replaying.
+
+Injection points are saved to a *recording file*, where each line denotes an injection point. Example:
+
+```
+42, solve.jl, OrdinaryDiffEq::solve OrdinaryDiffEq::do_it Finch::make_it_so
+```
+
+The first field `42` is the injection point, or the nth time a floating point operation was intercepted by FloatTracker. The second field `solve.jl` acts as a little sanity check: this is the first non-FloatTracker file off of the stack trace. After that comes a list of module names paired with the function on the call stack.
+
 # Generating CSTGs
 
 Get the [CSTG](https://github.com/utahplt/cstg) code.
