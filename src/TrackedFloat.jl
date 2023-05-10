@@ -1,7 +1,9 @@
 abstract type AbstractTrackedFloat <: AbstractFloat end
 
+# This variable is visible module-wide
 injector = make_injector(should_inject=false, odds=0, n_inject=0)
 
+# Old, dumpy API
 function set_inject_nan(i::Injector)
   injector.active = i.active
   injector.odds = i.odds

@@ -1,5 +1,6 @@
 using Base.StackTraces
 using Base.Iterators
+using Core: StackTrace
 
 """
 Struct to describe a function location; used by the Injector
@@ -18,9 +19,15 @@ FunctionRef(name, file) = FunctionRef(name, file, false)
 FunctionRef(name :: String, file, avoid) = FunctionRef(Symbol(name), file, avoid)
 FunctionRef(name :: Symbol, file :: String, avoid) = FunctionRef(name, Symbol(file), avoid)
 
+"""
+    ReplayPoint(counter, check, module_list)
+
+Represents a point where a `NaN` was injected during program execution.
+"""
 struct ReplayPoint
   counter::Int64
   check::Symbol
+  module_list::Vector{Symbol}
 end
 
 """
@@ -59,12 +66,14 @@ mutable struct Injector
   libraries::Array{String}
   replay::String
   record::String
+  session::String
 
   # private fields
   place_counter::Int64
   replay_script::Array{ReplayPoint}
   replay_head::Int64
 end
+Injector(odds::Int64, n_inject::Int64) = make_injector(odds=odds, n_inject=n_inject)
 
 function make_injector(; should_inject::Bool=true, odds::Int64=10, n_inject::Int64=1, functions=[], libraries=[], replay="", record="")
   script =
@@ -76,12 +85,31 @@ function make_injector(; should_inject::Bool=true, odds::Int64=10, n_inject::Int
   return Injector(should_inject, odds, n_inject, functions, libraries, replay, record, 0, script, 1)
 end
 
+function set_session!(inj::Injector, session_name::String)
+  inj.session = session_name
+
+  # TODO: parse existing session files
+end
+
+function include_libs!()
+end
+
+function exclude_libs!()
+end
+
+function include_funcs!()
+end
+
+function exclude_funcs!()
+end
+
 function parse_replay_file(replay::String)::Array{ReplayPoint}
   return [parse_replay_line(l) for l in readlines(replay)]
 end
 
 function parse_replay_line(line::String)::ReplayPoint
-  m = match(r"^(\d+), (.*)$", line)
+  m = match(r"^(\d+), ([^,]*), (.*)$", line)
+  # FIXME: finish work to parse list of modules
   return ReplayPoint(parse(Int64, m.captures[1]), Symbol(m.captures[2]))
 end
 
@@ -118,9 +146,7 @@ function should_inject(i::Injector)::Bool
       # We're recording this
       did_injectp = injectable_region(i, st)
       if did_injectp
-        fh = open(i.record, "a")
-        println(fh, "$(i.place_counter), $(frame_file(drop_ft_frames(st)[1]))")
-        close(fh)
+        write_replay_point(i, capture_replay_point(i, st))
       end
       return did_injectp
     else
@@ -129,6 +155,19 @@ function should_inject(i::Injector)::Bool
   end
 
   return false
+end
+
+function capture_replay_point(i::Injector, st::StackTrace)
+  this_file = frame_file(drop_ft_frames(st)[1])
+  module_names = map(frame_library, drop_ft_frames(st))
+  ReplayPoint(i.place_counter, this_file, module_names)
+end
+
+function write_replay_point(i::Injector, rp::ReplayPoint)
+  fh = open(i.record, "a")
+  # FIXME: how can I best serialize the module list?
+  println(fh, "$(rp.counter), $(rp.check), $(rp.module_list)")
+  close(fh)
 end
 
 function handle_replay(i::Injector)::Bool
