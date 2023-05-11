@@ -1,6 +1,5 @@
 using Base.StackTraces
 using Base.Iterators
-using Core: StackTrace
 
 """
 Struct to describe a function location; used by the Injector
@@ -82,7 +81,7 @@ function make_injector(; should_inject::Bool=true, odds::Int64=10, n_inject::Int
     else
       []
     end
-  return Injector(should_inject, odds, n_inject, functions, libraries, replay, record, 0, script, 1)
+  return Injector(should_inject, odds, n_inject, functions, libraries, replay, record, "", 0, script, 1)
 end
 
 function set_session!(inj::Injector, session_name::String)
@@ -109,8 +108,8 @@ end
 
 function parse_replay_line(line::String)::ReplayPoint
   m = match(r"^(\d+), ([^,]*), (.*)$", line)
-  # FIXME: finish work to parse list of modules
-  return ReplayPoint(parse(Int64, m.captures[1]), Symbol(m.captures[2]))
+  # FIXME: make symbol capturing more robust
+  return ReplayPoint(parse(Int64, m.captures[1]), Symbol(m.captures[2]), map(Symbol, split(m.captures[3])))
 end
 
 """
@@ -157,10 +156,10 @@ function should_inject(i::Injector)::Bool
   return false
 end
 
-function capture_replay_point(i::Injector, st::StackTrace)
+function capture_replay_point(i::Injector, st::StackTraces.StackTrace)
   this_file = frame_file(drop_ft_frames(st)[1])
-  module_names = map(frame_library, drop_ft_frames(st))
-  ReplayPoint(i.place_counter, this_file, module_names)
+  module_names = map(Symbol ∘ frame_library, drop_ft_frames(st))
+  ReplayPoint(i.place_counter, Symbol(this_file), module_names)
 end
 
 function write_replay_point(i::Injector, rp::ReplayPoint)
