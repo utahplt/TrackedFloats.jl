@@ -26,7 +26,7 @@ Represents a point where a `NaN` was injected during program execution.
 struct ReplayPoint
   counter::Int64
   check::Symbol
-  module_list::Vector{Symbol}
+  stack::Vector{String}
 end
 
 """
@@ -108,8 +108,7 @@ end
 
 function parse_replay_line(line::String)::ReplayPoint
   m = match(r"^(\d+), ([^,]*), (.*)$", line)
-  # FIXME: make symbol capturing more robust
-  return ReplayPoint(parse(Int64, m.captures[1]), Symbol(m.captures[2]), map(Symbol, split(m.captures[3])))
+  return ReplayPoint(parse(Int64, m.captures[1]), Symbol(m.captures[2]), split(m.captures[3]))
 end
 
 """
@@ -145,7 +144,7 @@ function should_inject(i::Injector)::Bool
       # We're recording this
       did_injectp = injectable_region(i, st)
       if did_injectp
-        write_replay_point(i, capture_replay_point(i, st))
+        write_replay_point(i, make_replay_point(i, st))
       end
       return did_injectp
     else
@@ -156,16 +155,16 @@ function should_inject(i::Injector)::Bool
   return false
 end
 
-function capture_replay_point(i::Injector, st::StackTraces.StackTrace)
+function make_replay_point(i::Injector, st::StackTraces.StackTrace)::ReplayPoint
   this_file = frame_file(drop_ft_frames(st)[1])
-  module_names = map(Symbol ∘ frame_library, drop_ft_frames(st))
-  ReplayPoint(i.place_counter, Symbol(this_file), module_names)
+  short_frames = map((f -> "$(frame_library(f)):$(frame_file(f)):$(frame_line(f))"), drop_ft_frames(st))
+  ReplayPoint(i.place_counter, Symbol(this_file), short_frames)
 end
 
 function write_replay_point(i::Injector, rp::ReplayPoint)
   fh = open(i.record, "a")
-  # FIXME: how can I best serialize the module list?
-  println(fh, "$(rp.counter), $(rp.check), $(rp.module_list)")
+  short_frames = join(rp.stack, " ")
+  println(fh, "$(rp.counter), $(rp.check), $short_frames")
   close(fh)
 end
 
@@ -250,9 +249,9 @@ getmodule(x::Core.MethodInstance) = getmodule(x.def)
 getmodule(x::Core.Method) = "$(x.module)"
 getmodule(x::Core.Module) = "$x"
 
-function frame_file(frame)::Symbol
-  return Symbol(split(String(frame.file), ['/', '\\'])[end])
-end
+frame_file(frame::StackTraces.StackFrame) = Symbol(split(String(frame.file), ['/', '\\'])[end])
+
+frame_line(frame::StackTraces.StackFrame) = frame.line
 
 """
     frame_library(frame::StackTraces.StackFrame)::Symbol
