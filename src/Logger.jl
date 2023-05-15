@@ -67,14 +67,16 @@ function write_log_to_file()
   end
 end
 
-function format_cstg_stackframe(sf::StackTraces.StackFrame)
-  if log_config.cstgArgs && log_config.cstgLineNum
+function format_cstg_stackframe(sf::StackTraces.StackFrame, frame_args::Vector{} = [])
+  if log_config.cstgArgs && log_config.cstgLineNum && isempty(frame_args)
     return "$(sf)"
   end
   func = String(sf.func)
   linfo = "$(sf.linfo)"
-  args = if log_config.cstgArgs
+  args = if log_config.cstgArgs && isempty(frame_args)
     "($(split(linfo, '(')[end])"
+  elseif log_config.cstgArgs
+    "($frame_args)"
   else
     ""
   end
@@ -87,12 +89,18 @@ function format_cstg_stackframe(sf::StackTraces.StackFrame)
   "$(func)$(args) at $(sf.file)$(linenum)"
 end
 
-function write_events(file, events)
+function write_events(file, events::Vector{Event})
   for e in events
     if length(e.trace) > 0
-      for sf in e.trace
+
+      # correct args in top frame so it's the values not just the traces
+      write(file, "$(format_cstg_stackframe(e.trace[1], e.args))\n")
+
+      # write remaining frames
+      for sf in e.trace[2:end]
         write(file, "$(format_cstg_stackframe(sf))\n")
       end
+
       write(file, "\n")
     end
   end
