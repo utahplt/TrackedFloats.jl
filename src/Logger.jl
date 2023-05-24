@@ -7,9 +7,20 @@ mutable struct LoggerConfig
   outputCSTG::Bool
   cstgLineNum::Bool
   cstgArgs::Bool
+  maxLogs::Union{Int,AbstractString}
 end
 
-log_config = LoggerConfig("default", 5, false, false, true, true)
+# Constructors
+# LoggerConfig() =
+#   LoggerConfig("default", 1000)
+# LoggerConfig(filename, buff_size) =
+#   LoggerConfig(filename=filename, buffersize=buff_size, print=false, cstg=false, cstgLineNum=true, cstgArgs=true)
+# LoggerConfig(filename, buff_size, cstg) =
+#   LoggerConfig(filename=filename, buffersize=buff_size, print=false, cstg=cstg, cstgLineNum=true, cstgArgs=true)
+# LoggerConfig(; filename="default", buffersize=1000, print=false, cstg=false, cstgLineNum=true, cstgArgs=true) =
+#   LoggerConfig(filename, buffersize, print, cstg, cstgLineNum, cstgArgs)
+
+log_config = LoggerConfig("default", 1000, false, false, true, true, "unbounded")
 
 mutable struct Logger
   events::Array{Event}
@@ -17,7 +28,7 @@ end
 
 logger = Logger([])
 
-function set_logger(; filename="default", buffersize=5, print=false, cstg=false, cstgLineNum=true, cstgArgs=true)
+function set_logger(; filename="default", buffersize=1000, print=false, cstg=false, cstgLineNum=true, cstgArgs=true, maxLogs="unbounded")
   now_str = Dates.format(now(), "yyyymmddHHMMss")
   log_config.filename = "$(now_str)-$(filename)"
   log_config.buffersize = buffersize
@@ -25,6 +36,7 @@ function set_logger(; filename="default", buffersize=5, print=false, cstg=false,
   log_config.outputCSTG = cstg
   log_config.cstgLineNum = cstgLineNum
   log_config.cstgArgs = cstgArgs
+  log_config.maxLogs = maxLogs
   return log_config.filename
 end
 
@@ -68,18 +80,26 @@ function write_log_to_file()
 end
 
 function format_cstg_stackframe(sf::StackTraces.StackFrame, frame_args::Vector{} = [])
-  if log_config.cstgArgs && log_config.cstgLineNum && isempty(frame_args)
-    return "$(sf)"
-  end
-  func = String(sf.func)
+  # if log_config.cstgArgs && log_config.cstgLineNum && isempty(frame_args)
+  #   return "$(sf)"
+  # end
+  func = String(sf.func)        # FIXME/TODO: can we make sure the function name here is well-formed for CSTG's digestion?
   linfo = "$(sf.linfo)"
   args = if log_config.cstgArgs && isempty(frame_args)
-    "($(split(linfo, '(')[end])"
+    if isa(sf.linfo, Core.CodeInfo)
+      "$(sf.linfo.code[1])"
+    else
+      mx = match(r"^.+\((.*?)\)", linfo)
+      "($(!isnothing(mx) && length(mx) > 0 ? mx[1] : ""))"
+    end
   elseif log_config.cstgArgs
     "($frame_args)"
   else
     ""
   end
+
+  println("linfo: $linfo; args: $args")
+
   linenum = if log_config.cstgLineNum
     ":$(sf.line)"
   else
