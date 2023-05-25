@@ -1,14 +1,15 @@
 module FloatTracker
 
+export TrackedFloat16, TrackedFloat32, TrackedFloat64, FunctionRef
+export LoggerConfig, set_logger_config!, set_exclude_stacktrace!, print_log, write_out_logs
+export InjectorConfig, set_injector_config!, enable_nan_injection!, enable_injection_recording!
+export SessionConfig
+
 include("SharedStructs.jl")
 include("Config.jl")
-
-export TrackedFloat16, TrackedFloat32, TrackedFloat64, FunctionRef, print_log, write_out_logs, set_inject_nan, set_exclude_stacktrace, set_logger, make_injector
-import Base
-
 include("Event.jl")
 include("Logger.jl")
 include("Injector.jl")
 include("TrackedFloat.jl")
 
-end # module
+end

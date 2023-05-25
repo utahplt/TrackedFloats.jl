@@ -1,32 +1,5 @@
 abstract type AbstractTrackedFloat <: AbstractFloat end
 
-# This variable is visible module-wide
-injector = make_injector(should_inject=false, odds=0, n_inject=0)
-
-# Old, dumpy API
-function set_inject_nan(i::Injector)
-  injector.active = i.active
-  injector.odds = i.odds
-  injector.ninject = i.ninject
-  injector.functions = i.functions
-  injector.libraries = i.libraries
-  injector.replay = i.replay
-  injector.record = i.record
-  injector.place_counter = i.place_counter
-  injector.replay_script = i.replay_script
-  injector.replay_head = i.replay_head
-end
-
-function set_inject_nan(should_inject::Bool, odds::Int = 10, n_inject = 1, functions = [], libraries = []; replay = "", record = "")
-  injector.active = should_inject
-  injector.odds = odds
-  injector.ninject = n_inject
-  injector.functions = functions
-  injector.libraries = libraries
-  injector.replay = replay
-  injector.record = record
-end
-
 @inline function check_error(fn, injected::Bool, result, args...)
   if any(v -> isfloaterror(v), [args..., result])
     # args is a tuple; we call `collect` to get a Vector without promoting the types
@@ -36,8 +9,8 @@ end
 end
 
 @inline function run_or_inject(fn, args...)
-  if should_inject(injector)
-    decrement_injections(injector)
+  if should_inject(ft_config.inj)
+    decrement_injections(ft_config.inj)
     (NaN, true)
   else
     (fn(args...), false)
