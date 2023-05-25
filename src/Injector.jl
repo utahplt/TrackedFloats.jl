@@ -1,35 +1,8 @@
 using Base.StackTraces
 using Base.Iterators
 
-mutable struct Injector
-  active::Bool
-  odds::Int64
-  ninject::Int64
-  functions::Array{FunctionRef}
-  libraries::Array{String}
-  replay::String
-  record::String
-  session::String
-
-  # private fields
-  place_counter::Int64
-  replay_script::Array{ReplayPoint}
-  replay_head::Int64
-end
-Injector(odds::Int64, n_inject::Int64) = make_injector(odds=odds, n_inject=n_inject)
-
-function make_injector(; should_inject::Bool=true, odds::Int64=10, n_inject::Int64=1, functions=[], libraries=[], replay="", record="")
-  script =
-    if replay !== ""
-      parse_replay_file(replay)
-    else
-      []
-    end
-  return Injector(should_inject, odds, n_inject, functions, libraries, replay, record, "", 0, script, 1)
-end
-
 """
-    should_inject(i::Injector)
+    should_inject(i::InjectorConfig)
 
 Return whether or not we should inject a `NaN`.
 
@@ -39,15 +12,15 @@ Decision process:
 
  - Checks that there are some NaNs remaining to inject.
 
- - Rolls an `Injector.odds`-sided die; if 1, proceed, otherwise, don't do
+ - Rolls an `InjectorConfig.odds`-sided die; if 1, proceed, otherwise, don't do
    anything.
 
- - Checks that we're inside the scope of a function in `Injector.functions` OR
+ - Checks that we're inside the scope of a function in `InjectorConfig.functions` OR
    that we're in a library that we're interested in. If yes, inject.
 
  - Defaults to not injecting.
 """
-function should_inject(i::Injector)::Bool
+function should_inject(i::InjectorConfig)::Bool
   i.place_counter += 1
 
   # Are we replaying a recording?
@@ -72,20 +45,20 @@ function should_inject(i::Injector)::Bool
   return false
 end
 
-function make_replay_point(i::Injector, st::StackTraces.StackTrace)::ReplayPoint
+function make_replay_point(i::InjectorConfig, st::StackTraces.StackTrace)::ReplayPoint
   this_file = frame_file(drop_ft_frames(st)[1])
   short_frames = map((f -> "$(frame_library(f)):$(frame_file(f)):$(frame_line(f))"), drop_ft_frames(st))
   ReplayPoint(i.place_counter, Symbol(this_file), short_frames)
 end
 
-function write_replay_point(i::Injector, rp::ReplayPoint)
+function write_replay_point(i::InjectorConfig, rp::ReplayPoint)
   fh = open(i.record, "a")
   short_frames = join(rp.stack, " ")
   println(fh, "$(rp.counter), $(rp.check), $short_frames")
   close(fh)
 end
 
-function handle_replay(i::Injector)::Bool
+function handle_replay(i::InjectorConfig)::Bool
   script = i.replay_script
   head = i.replay_head
   place = i.place_counter
@@ -111,7 +84,7 @@ function handle_replay(i::Injector)::Bool
   return false
 end
 
-@inline function decrement_injections(i::Injector)
+@inline function decrement_injections(i::InjectorConfig)
   i.ninject = i.ninject - 1
 end
 
@@ -120,12 +93,12 @@ end
 end
 
 """
-    injectable_region(i::Injector, frames::StackTrace)::Bool
+    injectable_region(i::InjectorConfig, frames::StackTrace)::Bool
 
 Returns whether or not the current point in the code (indicated by the
 StackTrace) is a valid point to inject a NaN.
 """
-function injectable_region(i::Injector, raw_frames::StackTraces.StackTrace)::Bool
+function injectable_region(i::InjectorConfig, raw_frames::StackTraces.StackTrace)::Bool
   # Drop FloatTracker frames
   frames = drop_ft_frames(raw_frames)
 
