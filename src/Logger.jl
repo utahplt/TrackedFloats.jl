@@ -1,26 +1,4 @@
-using Dates
-
-mutable struct LoggerConfig
-  filename::String
-  buffersize::Int
-  printToStdOut::Bool
-  outputCSTG::Bool
-  cstgLineNum::Bool
-  cstgArgs::Bool
-  maxLogs::Union{Int,AbstractString}
-end
-
 # Constructors
-# LoggerConfig() =
-#   LoggerConfig("default", 1000)
-# LoggerConfig(filename, buff_size) =
-#   LoggerConfig(filename=filename, buffersize=buff_size, print=false, cstg=false, cstgLineNum=true, cstgArgs=true)
-# LoggerConfig(filename, buff_size, cstg) =
-#   LoggerConfig(filename=filename, buffersize=buff_size, print=false, cstg=cstg, cstgLineNum=true, cstgArgs=true)
-# LoggerConfig(; filename="default", buffersize=1000, print=false, cstg=false, cstgLineNum=true, cstgArgs=true) =
-#   LoggerConfig(filename, buffersize, print, cstg, cstgLineNum, cstgArgs)
-
-log_config = LoggerConfig("default", 1000, false, false, true, true, "unbounded")
 
 mutable struct Logger
   events::Array{Event}
@@ -28,24 +6,12 @@ end
 
 logger = Logger([])
 
-function set_logger(; filename="default", buffersize=1000, print=false, cstg=false, cstgLineNum=true, cstgArgs=true, maxLogs="unbounded")
-  now_str = Dates.format(now(), "yyyymmddHHMMss")
-  log_config.filename = "$(now_str)-$(filename)"
-  log_config.buffersize = buffersize
-  log_config.printToStdOut = print
-  log_config.outputCSTG = cstg
-  log_config.cstgLineNum = cstgLineNum
-  log_config.cstgArgs = cstgArgs
-  log_config.maxLogs = maxLogs
-  return log_config.filename
-end
-
 function log_event(evt::Event)
   push!(logger.events, evt)
-  if log_config.printToStdOut
+  if ft_config.log.printToStdOut
     println(to_string(evt))
   end
-  if length(logger.events) >= log_config.buffersize
+  if length(logger.events) >= ft_config.log.buffersize
     write_out_logs()
     logger.events = []
   end
@@ -53,7 +19,7 @@ end
 
 function write_out_logs()
   write_log_to_file()
-  if log_config.outputCSTG
+  if ft_config.log.outputCSTG
     write_logs_for_cstg()
   end
 end
@@ -71,7 +37,7 @@ Flush output logs.
 """
 function write_log_to_file()
   if length(logger.events) > 0
-    open("$(log_config.filename)_error_log.txt", "a") do file
+    open("$(ft_config.log.filename)_error_log.txt", "a") do file
       for e in logger.events
         write(file, "$(to_string(e))\n\n")
       end
@@ -85,14 +51,14 @@ function format_cstg_stackframe(sf::StackTraces.StackFrame, frame_args::Vector{}
   # end
   func = String(sf.func)        # FIXME/TODO: can we make sure the function name here is well-formed for CSTG's digestion?
   linfo = "$(sf.linfo)"
-  args = if log_config.cstgArgs && isempty(frame_args)
+  args = if ft_config.log.cstgArgs && isempty(frame_args)
     if isa(sf.linfo, Core.CodeInfo)
       "$(sf.linfo.code[1])"
     else
       mx = match(r"^.+\((.*?)\)", linfo)
       "($(!isnothing(mx) && length(mx) > 0 ? mx[1] : ""))"
     end
-  elseif log_config.cstgArgs
+  elseif ft_config.log.cstgArgs
     "($frame_args)"
   else
     ""
@@ -100,7 +66,7 @@ function format_cstg_stackframe(sf::StackTraces.StackFrame, frame_args::Vector{}
 
   println("linfo: $linfo; args: $args")
 
-  linenum = if log_config.cstgLineNum
+  linenum = if ft_config.log.cstgLineNum
     ":$(sf.line)"
   else
     ""
@@ -132,22 +98,22 @@ function write_logs_for_cstg()
   props = filter(e -> e.evt_type == :prop, logger.events)
   kills = filter(e -> e.evt_type == :kill, logger.events)
   if length(injects) > 0
-    open("$(log_config.filename)_cstg_injects.txt", "a") do file
+    open("$(ft_config.log.filename)_cstg_injects.txt", "a") do file
       write_events(file, injects)
     end
   end
   if length(gens) > 0
-    open("$(log_config.filename)_cstg_gens.txt", "a") do file
+    open("$(ft_config.log.filename)_cstg_gens.txt", "a") do file
       write_events(file, gens)
     end
   end
   if length(props) > 0
-    open("$(log_config.filename)_cstg_props.txt", "a") do file
+    open("$(ft_config.log.filename)_cstg_props.txt", "a") do file
       write_events(file, props)
     end
   end
   if length(kills) > 0
-    open("$(log_config.filename)_cstg_kills.txt", "a") do file
+    open("$(ft_config.log.filename)_cstg_kills.txt", "a") do file
       write_events(file, kills)
     end
   end

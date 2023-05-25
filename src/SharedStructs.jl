@@ -25,3 +25,23 @@ struct ReplayPoint
   check::Symbol
   stack::Vector{String}
 end
+
+"""
+    Event
+
+Struct representing some event in the life of a NaN.
+
+`evt_type` options:
+
+ - `:injected`
+ - `:gen`
+ - `:prop`
+ - `:kill`
+"""
+struct Event
+  evt_type::Symbol
+  op::String
+  args::Array{Any}
+  result::Any
+  trace::StackTraces.StackTrace
+end

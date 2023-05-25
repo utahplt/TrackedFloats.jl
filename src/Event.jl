@@ -3,40 +3,6 @@
 end
 
 """
-    Event
-
-Struct representing some event in the life of a NaN.
-
-`evt_type` options:
-
- - `:injected`
- - `:gen`
- - `:prop`
- - `:kill`
-"""
-struct Event
-  evt_type::Symbol
-  op::String
-  args::Array{Any}
-  result::Any
-  trace::StackTraces.StackTrace
-end
-
-exclude_stacktrace = [:prop]
-
-"""
-    set_exclude_stacktrace(exclusions = [:prop])
-
-Set the types of stack traces to not collect.
-
-See documentation for the `event()` function for details on the types of events
-that can be put into this list.
-"""
-function set_exclude_stacktrace(exclusions = [:prop])
-  global exclude_stacktrace = exclusions
-end
-
-"""
     event(op, args, result, is_injected = false)
 
 Construct an `Event` struct.
@@ -61,7 +27,7 @@ function event(op, args, result, is_injected = false) :: Event
       :kill
     end
 
-  st = if evt_type in exclude_stacktrace
+  st = if evt_type in ft_config.log.exclusions
     Base.StackFrame[]
   else
     stacktrace()[2:end]
