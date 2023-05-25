@@ -45,6 +45,8 @@ function should_inject(i::InjectorConfig)::Bool
   return false
 end
 
+export should_inject            # only for testing
+
 function make_replay_point(i::InjectorConfig, st::StackTraces.StackTrace)::ReplayPoint
   this_file = frame_file(drop_ft_frames(st)[1])
   short_frames = map((f -> "$(frame_library(f)):$(frame_file(f)):$(frame_line(f))"), drop_ft_frames(st))
@@ -59,7 +61,7 @@ function write_replay_point(i::InjectorConfig, rp::ReplayPoint)
 end
 
 function handle_replay(i::InjectorConfig)::Bool
-  script = i.replay_script
+  script = i.replay_script.script
   head = i.replay_head
   place = i.place_counter
 
