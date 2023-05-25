@@ -65,7 +65,7 @@ LoggerConfig(filename, buff_size, cstg) =
   LoggerConfig(filename=filename, buffersize=buff_size, print=false, cstg=cstg, cstgLineNum=true, cstgArgs=true)
 
 function LoggerConfig(; filename="default", buffersize=1000, print=false, cstg=false, cstgLineNum=true, cstgArgs=true,
-                      max_logs=Unbounded, exclusions=[:prop])
+                      max_logs=Unbounded(), exclusions=[:prop])
   now_str = Dates.format(now(), "yyyymmddHHMMss")
   LoggerConfig("$now_str-$filename", buffersize, print, cstg, cstgLineNum, cstgArgs, max_logs, exclusions)
 end
@@ -142,7 +142,7 @@ function InjectorConfig(; should_inject::Bool=true, odds::Int64=10, n_inject::In
     else
       []
     end
-  return InjectorConfig(should_inject, odds, n_inject, functions, libraries, replay, record, "", 0, script, 1)
+  return InjectorConfig(should_inject, odds, n_inject, functions, libraries, replay, record, "", 0, InjectorScript(script), 1)
 end
 
 #
@@ -155,7 +155,7 @@ mutable struct SessionConfig
   maxKills::Union{Int,Unbounded}
   maxEvents::Union{Int,Unbounded}
 end
-SessionConfig() = SessionConfig(Unbounded, Unbounded, Unbounded, Unbounded)
+SessionConfig() = SessionConfig(Unbounded(), Unbounded(), Unbounded(), Unbounded())
 
 """
 FloatTracker config struct
