@@ -1,62 +1,6 @@
 using Base.StackTraces
 using Base.Iterators
 
-"""
-Struct to describe a function location; used by the Injector
-
-The `avoid` field defaults to `false`—setting this to `true` will make it so
-that if that function will *not* be considered a candidate for injection.
-"""
-struct FunctionRef
-  name::Symbol
-  file::Symbol
-  avoid::Bool
-end
-
-# Convenience functions to make constructing these a little simpler
-FunctionRef(name, file) = FunctionRef(name, file, false)
-FunctionRef(name :: String, file, avoid) = FunctionRef(Symbol(name), file, avoid)
-FunctionRef(name :: Symbol, file :: String, avoid) = FunctionRef(name, Symbol(file), avoid)
-
-"""
-    ReplayPoint(counter, check, module_list)
-
-Represents a point where a `NaN` was injected during program execution.
-"""
-struct ReplayPoint
-  counter::Int64
-  check::Symbol
-  stack::Vector{String}
-end
-
-"""
-Struct describing parameters for injecting NaNs
-
-## Fields
-
- - `active::Boolean` inject only if true
-
- - `ninject::Int` maximum number of NaNs to inject; gets decremented every time
-   a NaN gets injected
-
- - `odds::Int` inject a NaN with 1:odds probability—higher value → rarer to
-   inject
-
- - `functions::Array{FunctionRef}` if given, only inject NaNs when within these
-   functions; default is to not discriminate on functions
-
- - `libraries::Array{String}` if given, only inject NaNs when within this library.
-
- - `record::String` if given, record injection invents in a way that can be
-   replayed later with the `replay` argument.
-
- - `replay::String` if given, ignore all previous directives and use this file
-   for injection replay.
-
-`functions` and `libraries` work together as a union: i.e. the set of possible NaN
-injection points is a union of the places matched by `functions` and `libraries`.
-
-"""
 mutable struct Injector
   active::Bool
   odds::Int64
@@ -82,33 +26,6 @@ function make_injector(; should_inject::Bool=true, odds::Int64=10, n_inject::Int
       []
     end
   return Injector(should_inject, odds, n_inject, functions, libraries, replay, record, "", 0, script, 1)
-end
-
-function set_session!(inj::Injector, session_name::String)
-  inj.session = session_name
-
-  # TODO: parse existing session files
-end
-
-function include_libs!()
-end
-
-function exclude_libs!()
-end
-
-function include_funcs!()
-end
-
-function exclude_funcs!()
-end
-
-function parse_replay_file(replay::String)::Array{ReplayPoint}
-  return [parse_replay_line(l) for l in readlines(replay)]
-end
-
-function parse_replay_line(line::String)::ReplayPoint
-  m = match(r"^(\d+), ([^,]*), (.*)$", line)
-  return ReplayPoint(parse(Int64, m.captures[1]), Symbol(m.captures[2]), split(m.captures[3]))
 end
 
 """
