@@ -4,6 +4,8 @@ println("Loading FloatTracker…")
 include("../src/FloatTracker.jl")
 using .FloatTracker
 
+ft_init()
+
 println("FloatTracker loaded")
 
 @testset "should_inject basic behavior" begin

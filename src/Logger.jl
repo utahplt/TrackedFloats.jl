@@ -37,7 +37,7 @@ Flush output logs.
 """
 function write_log_to_file()
   if length(logger.events) > 0
-    open("$(ft_config.log.filename)_error_log.txt", "a") do file
+    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_error_log.txt", "a") do file
       for e in logger.events
         write(file, "$(to_string(e))\n\n")
       end
@@ -98,22 +98,22 @@ function write_logs_for_cstg()
   props = filter(e -> e.evt_type == :prop, logger.events)
   kills = filter(e -> e.evt_type == :kill, logger.events)
   if length(injects) > 0
-    open("$(ft_config.log.filename)_cstg_injects.txt", "a") do file
+    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_injects.txt", "a") do file
       write_events(file, injects)
     end
   end
   if length(gens) > 0
-    open("$(ft_config.log.filename)_cstg_gens.txt", "a") do file
+    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_gens.txt", "a") do file
       write_events(file, gens)
     end
   end
   if length(props) > 0
-    open("$(ft_config.log.filename)_cstg_props.txt", "a") do file
+    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_props.txt", "a") do file
       write_events(file, props)
     end
   end
   if length(kills) > 0
-    open("$(ft_config.log.filename)_cstg_kills.txt", "a") do file
+    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_kills.txt", "a") do file
       write_events(file, kills)
     end
   end
