@@ -174,6 +174,17 @@ end
 
 ft_config = FtConfig(LoggerConfig(), InjectorConfig(), SessionConfig())
 
+# Internal function
+function patch_config!(the_struct; kwargs ...)
+  for (k, v) in kwargs
+    setfield!(the_struct, k, v)
+  end
+end
+
+# Exported only for testing
+ft__get_global_ft_config_for_test() = ft_config
+export ft__get_global_ft_config_for_test
+
 """
     set_logger_config!(log::LoggerConfig)
     set_logger_config!(; args...)
@@ -183,12 +194,12 @@ Set the logger for the global FloatTracker configuration instance.
 Takes either a `LoggerConfig` struct, or the same keyword arguments as the
 `LoggerConfig` constructor.
 
-**NOTE** the second version overwrites the *entire* instance of `LoggerConfig`
-in the global config instance; i.e. you should not use this to update just the
-filename for the logger, because it will also overwrite the CSTG config, etc.
+In the case where only a few arguments are specified, it will override only
+those fields, i.e. the entire LoggerConfig won't be replaced. This is useful,
+for example, if you need to adjust a field in the middle of a test.
 """
 set_logger_config!(log::LoggerConfig) = ft_config.log = log
-set_logger_config!(; args...) = ft_config.log = LoggerConfig(; args...)
+set_logger_config!(; args...) = patch_config!(ft_config.log; args...)
 
 """
     set_injector_config!(log::InjectorConfig)
@@ -199,11 +210,18 @@ Set the injector for the global FloatTracker configuration instance.
 Takes either a `InjectorConfig` struct, or the same keyword arguments as the
 `InjectorConfig` constructor.
 
-Same caveats apply to this function as to `set_logger_config!`.
+Passing a partial list of keyword arguments has the same behavior as it does
+with `set_logger_config!`.
 """
 set_injector_config!(inj::InjectorConfig) = ft_config.inj = inj
-set_injector_config!(; args...) = ft_config.inj = InjectorConfig(; args...)
-
+function set_injector_config!(; args...)
+  if haskey(args, :filename)
+    f = args.filename
+    now_str = Dates.format(now(), "yyyymmddHHMMss")
+    args.filename = "$now_str-$f"
+  end
+  patch_config!(ft_config.inj; args...)
+end
 """
     set_session_config!(log::SessionConfig)
     set_session_config!(; args...)
@@ -213,10 +231,11 @@ Set the session for the global FloatTracker configuration instance.
 Takes either a `SessionConfig` struct, or the same keyword arguments as the
 `SessionConfig` constructor.
 
-Same caveats apply to this function as to `set_logger_config!`.
+Passing a partial list of keyword arguments has the same behavior as it does
+with `set_logger_config!`.
 """
 set_session_config!(ses::SessionConfig) = ft_config.ses = ses
-set_session_config!(; args...) = ft_config.ses = SessionConfig(; args...)
+set_session_config!(; args...) = patch_config!(ft_config.ses; args...)
 
 """
     set_exclude_stacktrace!(exclusions = [:prop])

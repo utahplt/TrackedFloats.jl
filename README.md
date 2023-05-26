@@ -41,7 +41,59 @@ That said, there are two things you should configure when using FloatTracker:
 
 ### Configuring the logger
 
+```julia
+set_logger_config!(filename="whatever")        # set log file basename to "whatever"; files match "$timestamp-whatever_*.txt"
+set_exclude_stacktrace!([:prop,:gen,:kill])    # disable all event logging
+```
+
+Options:
+
+ - `filename::String` Basename of the file to write logs to.
+
+   Constructors automatically prefix the timestamp to the beginning of this
+   basename so the logs are grouped together chronologically.
+
+ - `buffersize::Int` Number of logs to buffer in memory before writing to file.
+
+   Defaults to 1000. Decrease if you are crashing without getting the logs that you need.
+
+ - `printToStdOut::Bool` Whether or not to write logs to STDOUT; defaults  to `false`.
+
+ - `outputCSTG::Bool` Write logs in CSTG format.
+
+ - `cstgLineNum::Bool` Include the line number in CSTG output.
+
+ - `cstgArgs::Bool` Include arguments to functions in CSTG output.
+
+ - `maxLogs::Union{Int,Unbounded}` Maximum number of events to log; defaults to `Unbounded`.
+
+ - `exclusions::Array{Symbol}` Events to not log; defaults to `[:prop]`.
+
 ### Configuring the injector
+
+Options:
+
+ - `active::Boolean` inject only if true
+
+ - `ninject::Int` maximum number of NaNs to inject; gets decremented every time
+   a NaN gets injected
+
+ - `odds::Int` inject a NaN with 1:odds probability—higher value → rarer to
+   inject
+
+ - `functions::Array{FunctionRef}` if given, only inject NaNs when within these
+   functions; default is to not discriminate on functions
+
+ - `libraries::Array{String}` if given, only inject NaNs when within this library.
+
+ - `record::String` if given, record injection invents in a way that can be
+   replayed later with the `replay` argument.
+
+ - `replay::String` if given, ignore all previous directives and use this file
+   for injection replay.
+
+`functions` and `libraries` work together as a union: i.e. the set of possible NaN
+injection points is a union of the places matched by `functions` and `libraries`.
 
 ## Example
 

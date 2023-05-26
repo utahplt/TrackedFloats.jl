@@ -1,5 +1,8 @@
 using Test
 
+println("--- config API tests ---")
+include("config_api_tests.jl")
+
 println("--- injector tests ---")
 include("injector_tests.jl")
 
