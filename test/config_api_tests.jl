@@ -3,6 +3,8 @@ using Test
 include("../src/FloatTracker.jl")
 using .FloatTracker
 
+ft_init()
+
 @testset "set_*_config! tests don't override" begin
   global_config = ft__get_global_ft_config_for_test()
   mirror = FtConfig(LoggerConfig(),
@@ -23,15 +25,3 @@ using .FloatTracker
   @test "$global_config" == "$mirror"
   @test global_config.inj.odds == 42
 end
-
-@testset "timestamp gets added correctly to log config" begin
-  global_config = ft__get_global_ft_config_for_test()
-  fln = global_config.log.filename
-
-  @test match(r"\d+-ft_log", fln) !== nothing
-
-  set_logger_config!(filename="foobar")
-  println(global_config.log.filename)
-  @test match(r"\d+-foobar", global_config.log.filename) !== nothing
-end
-

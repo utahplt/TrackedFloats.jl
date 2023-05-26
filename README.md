@@ -25,9 +25,13 @@ These events are then stored in a buffered log and can be written out to a file 
 
 ## Usage
 
-Wrap as many of your inputs in `TrackedFloatN` as you can, and FloatTracker should take care of the rest.
+ 1. Import/use and call `ft_init()` to initialize the logger and injector config to their default values.
+ 2. Add additional customization to logging and injection.
+ 3. Wrap as many of your inputs in `TrackedFloatN` as you can
 
-That said, there are two things you should configure when using FloatTracker:
+FloatTracker should take care of the rest!
+
+Digging into step 2, there are two things that you can customize after initialization:
 
  - **The logger**
 
@@ -98,8 +102,9 @@ injection points is a union of the places matched by `functions` and `libraries`
 ## Example
 
 ```julia
-using FloatTracker: TrackedFloat16, write_out_logs, set_logger_config!
+using FloatTracker: TrackedFloat16, write_out_logs, set_logger_config!, ft_init()
 
+ft_init()
 set_logger_config!(filename="max")
 
 function maximum(lst)

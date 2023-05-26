@@ -64,8 +64,7 @@ LoggerConfig(filename, buff_size, cstg) =
 
 function LoggerConfig(; filename="ft_log", buffersize=1000, print=false, cstg=false, cstgLineNum=true, cstgArgs=true,
                       max_logs=Unbounded(), exclusions=[:prop])
-  now_str = Dates.format(now(), "yyyymmddHHMMss")
-  LoggerConfig("$now_str-$filename", buffersize, print, cstg, cstgLineNum, cstgArgs, max_logs, exclusions)
+  LoggerConfig(filename, buffersize, print, cstg, cstgLineNum, cstgArgs, max_logs, exclusions)
 end
 
 #
@@ -123,7 +122,6 @@ mutable struct InjectorConfig
   libraries::Array{String}
   replay::String
   record::String
-  session::String
 
   # private fields
   place_counter::Int64
@@ -140,7 +138,7 @@ function InjectorConfig(; should_inject::Bool=true, odds::Int64=10, n_inject::In
     else
       []
     end
-  return InjectorConfig(should_inject, odds, n_inject, functions, libraries, replay, record, "", 0, InjectorScript(script), 1)
+  return InjectorConfig(should_inject, odds, n_inject, functions, libraries, replay, record, 0, InjectorScript(script), 1)
 end
 
 #
@@ -152,8 +150,12 @@ mutable struct SessionConfig
   maxProps::Union{Int,Unbounded}
   maxKills::Union{Int,Unbounded}
   maxEvents::Union{Int,Unbounded}
+  sessionId::String                # Defaults to current timestamp like yyyymmmddHHMMss
 end
-SessionConfig() = SessionConfig(Unbounded(), Unbounded(), Unbounded(), Unbounded())
+function SessionConfig()
+  now_str = Dates.format(now(), "yyyymmddHHMMSS")
+  SessionConfig(Unbounded(), Unbounded(), Unbounded(), Unbounded(), now_str)
+end
 
 """
 FloatTracker config struct
@@ -172,7 +174,20 @@ end
 # Global config instance
 #
 
-ft_config = FtConfig(LoggerConfig(), InjectorConfig(), SessionConfig())
+# Don't forget to call `ft_init()`!!!
+ft_config = nothing
+
+"""
+    ft_init()
+
+Initialize the global FloatTracker configuration.
+
+We need to make this a function, otherwise it can cache the value of the
+timestamp used for writing unique log files.
+"""
+function ft_init()
+  global ft_config = FtConfig(LoggerConfig(), InjectorConfig(), SessionConfig())
+end
 
 # Internal function
 function patch_config!(the_struct; kwargs ...)
@@ -214,14 +229,8 @@ Passing a partial list of keyword arguments has the same behavior as it does
 with `set_logger_config!`.
 """
 set_injector_config!(inj::InjectorConfig) = ft_config.inj = inj
-function set_injector_config!(; args...)
-  if haskey(args, :filename)
-    f = args.filename
-    now_str = Dates.format(now(), "yyyymmddHHMMss")
-    args.filename = "$now_str-$f"
-  end
-  patch_config!(ft_config.inj; args...)
-end
+set_injector_config!(; args...) = patch_config!(ft_config.inj; args...)
+
 """
     set_session_config!(log::SessionConfig)
     set_session_config!(; args...)
