@@ -1,6 +1,6 @@
 # FloatTracker.jl
 
-Track `NaN` generation and propagation in your code. 
+Track `NaN` generation and propagation in your code.
 
 Inspired by [Sherlogs.jl](https://github.com/milankl/Sherlogs.jl).
 
@@ -12,8 +12,8 @@ Examples have been moved from this repository to an [example repository](https:/
 
 # Description
 
-`FloatTracker.jl` is a library that provides three new types: `TrackedFloat16`, `TrackedFloat32`, and `TrackedFloat64`. 
-These behave just like their `FloatN` counterparts except that they detect and log instances of `NaN`. 
+`FloatTracker.jl` is a library that provides three new types: `TrackedFloat16`, `TrackedFloat32`, and `TrackedFloat64`.
+These behave just like their `FloatN` counterparts except that they detect and log instances of `NaN`.
 
 If a `NaN` appears in a primitive floating point operation (such as `+`, `-`, `abs`, `sin` etc.), it generates an event:
 
@@ -21,45 +21,63 @@ If a `NaN` appears in a primitive floating point operation (such as `+`, `-`, `a
 - **PROP**: the operation propagated a `NaN` from its arguments (e.g. `NaN + 2.0 -> NaN`)
 - **KILL**: the operation had a `NaN` in its arguments but not in its result (e.g. `NaN > 1.0 -> false`)
 
-These events are then stored in a buffered log and can be written out to a file during or after the execution of a program. 
+These events are then stored in a buffered log and can be written out to a file during or after the execution of a program.
+
+## Usage
+
+Wrap as many of your inputs in `TrackedFloatN` as you can, and FloatTracker should take care of the rest.
+
+That said, there are two things you should configure when using FloatTracker:
+
+ - **The logger**
+
+   Determines what and how events are captured and logged.
+
+ - **The injector**
+
+   Optional—default is to not inject. If you want to try injecting NaNs to fuzz your code, this is where you control when that happens.
+
+*Coming soon: injection sessions to run a series of fuzzes.*
+
+### Configuring the logger
+
+### Configuring the injector
 
 ## Example
 
 ```julia
-using FloatTracker: TrackedFloat16, write_out_logs, set_logger
+using FloatTracker: TrackedFloat16, write_out_logs, set_logger_config!
 
-set_logger(filename="max", buffersize=1)
+set_logger_config!(filename="max")
 
 function maximum(lst)
-  curr_max = 0.0
+  max_seen = 0.0
   for x in lst
-    if curr_max < x 
-      curr_max = x
+    if ! (x <= max_seen)
+      max_seen = x              # swap if new val greater
     end
   end
-  curr_max
+  max_seen
 end
 
 function maximum2(lst)
   foldl(max, lst)
 end
-  
+
 println("--- With less than ---")
-# res = maximum([1, NaN, 4])
-res = maximum([TrackedFloat16(x) for x in [1, NaN, 4]]).val
+res = maximum([TrackedFloat16(x) for x in [1, 5, 4, NaN, 4]]).val
 println("Result: $(res)")
 println()
 
 println("--- With builtin max ---")
-# res2 = maximum2([1, NaN, 4])
 res2 = maximum2([TrackedFloat16(x) for x in [1, NaN, 4]]).val
 println("Result: $(res2)")
 
 write_out_logs()
 ```
 
-This code shows two different implementations of a max-element function. 
-One uses the builtin `<` operator and the other uses Julia's `max` function. When encountering a `NaN` the `<` will "kill" it (always returning `false`) and the `max` function will "prop" it (always returning back the `NaN`). 
+This code shows two different implementations of a max-element function.
+One uses the builtin `<` operator and the other uses Julia's `max` function. When encountering a `NaN` the `<` will "kill" it (always returning `false`) and the `max` function will "prop" it (always returning back the `NaN`).
 
 We can see this in the log that produced by FloatTracker when running this file.
 
@@ -97,8 +115,8 @@ PROP NaN,4.0 -> max -> NaN
 	foldl at reduce.jl:193 [inlined]
 	maximum2(lst::Vector{TrackedFloat16}) at max.jl:17
 ```
-This is an example of a program where two different implementations can result in a different answer when dealing with `NaN` in the input. In a larger program, the presence of `NaN` can produce incorrect results. 
-This tool may be useful for debugging those sorts of issues. 
+This is an example of a program where two different implementations can result in a different answer when dealing with `NaN` in the input. In a larger program, the presence of `NaN` can produce incorrect results.
+This tool may be useful for debugging those sorts of issues.
 
 ## Known operations that can kill a NaN
 
