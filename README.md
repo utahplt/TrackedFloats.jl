@@ -93,7 +93,7 @@ Options:
 
  - `active::Boolean` inject only if true
 
- - `ninject::Int` maximum number of NaNs to inject; gets decremented every time
+ - `n_inject::Int` maximum number of NaNs to inject; gets decremented every time
    a NaN gets injected
 
  - `odds::Int` inject a NaN with 1:odds probability—higher value → rarer to

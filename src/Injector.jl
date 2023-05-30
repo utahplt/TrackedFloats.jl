@@ -28,7 +28,7 @@ function should_inject(i::InjectorConfig)::Bool
     return handle_replay(i)
   end
 
-  if i.active && i.ninject > 0 && rand(1:i.odds) == 1
+  if i.active && i.n_inject > 0 && rand(1:i.odds) == 1
     st = stacktrace()
     if i.record !== ""
       # We're recording this
@@ -87,7 +87,7 @@ function handle_replay(i::InjectorConfig)::Bool
 end
 
 @inline function decrement_injections(i::InjectorConfig)
-  i.ninject = i.ninject - 1
+  i.n_inject = i.n_inject - 1
 end
 
 @inline function drop_ft_frames(frames)

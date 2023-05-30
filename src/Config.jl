@@ -93,7 +93,7 @@ Struct describing parameters for injecting NaNs
 
  - `active::Boolean` inject only if true
 
- - `ninject::Int` maximum number of NaNs to inject; gets decremented every time
+ - `n_inject::Int` maximum number of NaNs to inject; gets decremented every time
    a NaN gets injected
 
  - `odds::Int` inject a NaN with 1:odds probability—higher value → rarer to
@@ -117,7 +117,7 @@ injection points is a union of the places matched by `functions` and `libraries`
 mutable struct InjectorConfig
   active::Bool
   odds::Int64
-  ninject::Int64
+  n_inject::Int64
   functions::Array{FunctionRef}
   libraries::Array{String}
   replay::String
@@ -273,13 +273,13 @@ NaNs. Overrides unspecified arguments to their defaults.
 """
 function enable_nan_injection!(n_inject::Int)
   ft_config.inj.active    = true
-  ft_config.inj.ninject   = n_inject
+  ft_config.inj.n_inject   = n_inject
 end
 
 function enable_nan_injection!(; odds::Int = 10, n_inject::Int = 1, functions::Array{FunctionRef} = [], libraries::Array{String} = [])
   ft_config.inj.active    = true
   ft_config.inj.odds      = odds
-  ft_config.inj.ninject   = n_inject
+  ft_config.inj.n_inject   = n_inject
   ft_config.inj.functions = functions
   ft_config.inj.libraries = libraries
 end
