@@ -19,7 +19,7 @@ end
 
 function write_out_logs()
   write_log_to_file()
-  if ft_config.log.outputCSTG
+  if ft_config.log.cstg
     write_logs_for_cstg()
   end
 end
@@ -64,7 +64,7 @@ function format_cstg_stackframe(sf::StackTraces.StackFrame, frame_args::Vector{}
     ""
   end
 
-  println("linfo: $linfo; args: $args")
+  # println("linfo: $linfo; args: $args")
 
   linenum = if ft_config.log.cstgLineNum
     ":$(sf.line)"

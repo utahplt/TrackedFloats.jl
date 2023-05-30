@@ -63,7 +63,7 @@ Options:
 
  - `printToStdOut::Bool` Whether or not to write logs to STDOUT; defaults  to `false`.
 
- - `outputCSTG::Bool` Write logs in CSTG format.
+ - `cstg::Bool` Write logs in CSTG format.
 
  - `cstgLineNum::Bool` Include the line number in CSTG output.
 
