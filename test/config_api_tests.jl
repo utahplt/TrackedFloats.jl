@@ -3,8 +3,6 @@ using Test
 include("../src/FloatTracker.jl")
 using .FloatTracker
 
-ft_init()
-
 @testset "set_*_config! tests don't override" begin
   global_config = ft__get_global_ft_config_for_test()
   mirror = FtConfig(LoggerConfig(),
