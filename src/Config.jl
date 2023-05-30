@@ -253,6 +253,9 @@ Globally set the types of stack traces to not collect.
 
 See documentation for the `event()` function for details on the types of events
 that can be put into this list.
+
+Convenience function; You can also set the stack trace exclusions with
+a keyword argument to `set_logger_config!`.
 """
 set_exclude_stacktrace!(exclusions = [:prop]) = ft_config.log.exclusions = exclusions
 
@@ -268,10 +271,11 @@ Turn on NaN injection. Optionally configure the odds for injection, as well as
 the number of NaNs to inject, and the functions/libraries in which to inject
 NaNs. Overrides unspecified arguments to their defaults.
 """
-function enable_nan_injection!(n_inject::Int)
+function enable_nan_injection!(n_inject::Int = 1)
   ft_config.inj.active    = true
   ft_config.inj.ninject   = n_inject
 end
+
 function enable_nan_injection!(; odds::Int = 10, n_inject::Int = 1, functions::Array{FunctionRef} = [], libraries::Array{String} = [])
   ft_config.inj.active    = true
   ft_config.inj.odds      = odds
@@ -291,10 +295,19 @@ consider using the one-argument form of `enable_nan_injection!(n_inject::Int)`.
 disable_nan_injection!() = ft_config.inj.active = false
 
 """
-    enable_injection_recording!(; recording_file::String="ft_recording")
+    enable_injection_recording!(recording_file::String="ft_recording")
 
 Turn on recording.
 """
-enable_injection_recording!(; recording_file::String="ft_recording") = ft_config.inj.record = recording_file
+enable_injection_recording!(recording_file::String="ft_recording") = ft_config.inj.record = recording_file
 
-set_injection_replay!(; replay_file::String) = ft_config.inj = InjectorConfig(replay=replay_file)
+"""
+    set_injection_replay!(replay_file::String)
+
+Sets the injector to read from a replay file.
+
+Note that this overwrites all previous configuration to the injector file, as
+once you are replaying an injection recording, all other configuration ceases to
+matter.
+"""
+set_injection_replay!(replay_file::String) = ft_config.inj = InjectorConfig(replay=replay_file)
