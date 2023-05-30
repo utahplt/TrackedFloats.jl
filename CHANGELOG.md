@@ -1,6 +1,10 @@
 # Changelog
 
-## 2023-05-30
+We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in the spec](https://semver.org/#semantic-versioning-specification-semver), until the API stabilizes and we make an official `1.0.0` release, expect new features and/or breaking changes with every update to the minor version number. Patch numbers will continue to be backwards-compatible with a given minor version number.
+
+That said, this is research software, so expect some instability as we aim first and foremost to push the boundaries of what is possible.
+
+## 0.1.0
 
 Massive configuration API rewrite. This should make it easier to maintain and extend in the future.
 
@@ -34,3 +38,7 @@ Massive configuration API rewrite. This should make it easier to maintain and ex
  - `set_exclude_stacktrace([:prop...])` → `set_exclude_stacktrace!([:prop...])`
 
    Convenience function; you can also set the exclusions by using a keyword argument to `set_logger_config!`.
+
+## 0.0.0
+
+Beginning of change tracking.
