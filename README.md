@@ -25,7 +25,7 @@ These events are then stored in a buffered log and can be written out to a file 
 
 ## Usage
 
- 1. Import/use and call `ft_init()` to initialize the logger and injector config to their default values.
+ 1. Call `using FloatTracker`; you may want to include functions like `enable_nan_injection!` or `set_logger_config!` or the like. (See below for more details.)
  2. Add additional customization to logging and injection.
  3. Wrap as many of your inputs in `TrackedFloatN` as you can
 
@@ -75,6 +75,20 @@ Options:
 
 ### Configuring the injector
 
+```julia
+# Inject 2 NaNs
+enable_nan_injection!(2)
+
+# Inject 2 NaNs, except when in the function "nope" in "way.jl"
+enable_nan_injection!(n_inject=2, functions=[FunctionRef("nope", "way.jl")])
+
+# Enable recording of injections
+enable_injection_recording!("ft_recording") # this is just the file basename; will have timestamp prepended
+
+# Enable recording playback
+set_injection_replay!("20230530T145830-ft_recording.txt")
+```
+
 Options:
 
  - `active::Boolean` inject only if true
@@ -104,7 +118,6 @@ injection points is a union of the places matched by `functions` and `libraries`
 ```julia
 using FloatTracker: TrackedFloat16, write_out_logs, set_logger_config!, ft_init()
 
-ft_init()
 set_logger_config!(filename="max")
 
 function maximum(lst)
