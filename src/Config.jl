@@ -35,7 +35,7 @@ Struct containing all configuration for the logger.
 
  - `printToStdOut::Bool` Whether or not to write logs to STDOUT; defaults  to `false`.
 
- - `outputCSTG::Bool` Write logs in CSTG format.
+ - `cstg::Bool` Write logs in CSTG format.
 
  - `cstgLineNum::Bool` Include the line number in CSTG output.
 
@@ -49,7 +49,7 @@ mutable struct LoggerConfig
   filename::String
   buffersize::Int
   printToStdOut::Bool
-  outputCSTG::Bool
+  cstg::Bool
   cstgLineNum::Bool
   cstgArgs::Bool
   maxLogs::Union{Int,Unbounded}
@@ -271,7 +271,7 @@ Turn on NaN injection. Optionally configure the odds for injection, as well as
 the number of NaNs to inject, and the functions/libraries in which to inject
 NaNs. Overrides unspecified arguments to their defaults.
 """
-function enable_nan_injection!(n_inject::Int = 1)
+function enable_nan_injection!(n_inject::Int)
   ft_config.inj.active    = true
   ft_config.inj.ninject   = n_inject
 end
