@@ -3,7 +3,7 @@ module FloatTracker
 export FtConfig, ft_init, TrackedFloat16, TrackedFloat32, TrackedFloat64, FunctionRef
 export LoggerConfig, config_logger, exclude_stacktrace, print_log, write_out_logs
 export InjectorConfig, config_injector, enable_nan_injection, disable_nan_injection, record_injection, replay_injection
-export SessionConfig
+export SessionConfig, config_session
 
 include("SharedStructs.jl")     # Structures used in multiple places throughout FloatTracker
 include("Config.jl")            # Primary interface routines: routines to control injection, logging, etc.

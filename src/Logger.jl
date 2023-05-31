@@ -33,11 +33,11 @@ end
 """
     write_log_to_file()
 
-Flush output logs.
+Flush error log.
 """
 function write_log_to_file()
   if length(logger.events) > 0
-    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_error_log.txt", "a") do file
+    open(errors_file(), "a") do file
       for e in logger.events
         write(file, "$(to_string(e))\n\n")
       end
@@ -82,8 +82,8 @@ function write_events(file, events::Vector{Event})
       # correct args in top frame so it's the values not just the traces
       write(file, "$(format_cstg_stackframe(e.trace[1], e.args))\n")
 
-      # write remaining frames
-      for sf in e.trace[2:end]
+      # write remaining frames up to ftv-config.log.maxFrames
+      for sf in e.trace[(isa(ft_config.log.maxFrames, Unbounded) ? (2:end) : (2:(ft_config.log.maxFrames + 1)))]
         write(file, "$(format_cstg_stackframe(sf))\n")
       end
 
@@ -98,22 +98,22 @@ function write_logs_for_cstg()
   props = filter(e -> e.evt_type == :prop, logger.events)
   kills = filter(e -> e.evt_type == :kill, logger.events)
   if length(injects) > 0
-    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_injects.txt", "a") do file
+    open(injects_file(), "a") do file
       write_events(file, injects)
     end
   end
   if length(gens) > 0
-    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_gens.txt", "a") do file
+    open(gens_file(), "a") do file
       write_events(file, gens)
     end
   end
   if length(props) > 0
-    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_props.txt", "a") do file
+    open(props_file(), "a") do file
       write_events(file, props)
     end
   end
   if length(kills) > 0
-    open("$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_kills.txt", "a") do file
+    open(kills_file(), "a") do file
       write_events(file, kills)
     end
   end
