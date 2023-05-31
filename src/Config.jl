@@ -43,6 +43,8 @@ Struct containing all configuration for the logger.
 
  - `maxLogs::Union{Int,Unbounded}` Maximum number of events to log; defaults to `Unbounded`.
 
+ - `maxFrames::Union{Int,Unbounded}` Maximum number of stack frames to print in logging; defaults to `Unbounded`.
+
  - `exclusions::Array{Symbol}` Events to not log; defaults to `[:prop]`.
 """
 mutable struct LoggerConfig
@@ -53,6 +55,7 @@ mutable struct LoggerConfig
   cstgLineNum::Bool
   cstgArgs::Bool
   maxLogs::Union{Int,Unbounded}
+  maxFrames::Union{Int,Unbounded}
   exclusions::Array{Symbol}
 end
 LoggerConfig(filename) =
@@ -63,13 +66,45 @@ LoggerConfig(filename, buff_size, cstg) =
   LoggerConfig(filename=filename, buffersize=buff_size, print=false, cstg=cstg, cstgLineNum=true, cstgArgs=true)
 
 function LoggerConfig(; filename="ft_log", buffersize=1000, print=false, cstg=false, cstgLineNum=true, cstgArgs=true,
-                      max_logs=Unbounded(), exclusions=[:prop])
-  LoggerConfig(filename, buffersize, print, cstg, cstgLineNum, cstgArgs, max_logs, exclusions)
+                      maxLogs=Unbounded(), maxFrames=Unbounded(), exclusions=[:prop])
+  LoggerConfig(filename, buffersize, print, cstg, cstgLineNum, cstgArgs, maxLogs, maxFrames, exclusions)
 end
 
-#
-# Injector config
-#
+function injects_file()
+  if ft_config.ses.testing
+    ft_config.log.filename
+  else
+    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_injects.txt"
+  end
+end
+function gens_file()
+  if ft_config.ses.testing
+    ft_config.log.filename
+  else
+    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_gens.txt"
+  end
+end
+function props_file()
+  if ft_config.ses.testing
+    ft_config.log.filename
+  else
+    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_props.txt"
+  end
+end
+function kills_file()
+  if ft_config.ses.testing
+    ft_config.log.filename
+  else
+    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_kills.txt"
+  end
+end
+function errors_file()
+  if ft_config.ses.testing
+    ft_config.log.filename
+  else
+    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_error_log.txt"
+  end
+end
 
 struct InjectorScript
   script::Array{ReplayPoint}
@@ -151,10 +186,11 @@ mutable struct SessionConfig
   maxKills::Union{Int,Unbounded}
   maxEvents::Union{Int,Unbounded}
   sessionId::String                # Defaults to current timestamp like yyyymmmddHHMMss
+  testing::Bool                    # Don't document this: this is only for running tests
 end
 function SessionConfig()
   now_str = Dates.format(now(), "yyyymmddHHMMSS")
-  SessionConfig(Unbounded(), Unbounded(), Unbounded(), Unbounded(), now_str)
+  SessionConfig(Unbounded(), Unbounded(), Unbounded(), Unbounded(), now_str, false)
 end
 
 """
