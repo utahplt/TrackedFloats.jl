@@ -273,13 +273,15 @@ NaNs. Overrides unspecified arguments to their defaults.
 """
 function enable_nan_injection!(n_inject::Int)
   ft_config.inj.active    = true
-  ft_config.inj.n_inject   = n_inject
+  ft_config.inj.n_inject  = n_inject
 end
 
-function enable_nan_injection!(; odds::Int = 10, n_inject::Int = 1, functions::Array{FunctionRef} = [], libraries::Array{String} = [])
+function enable_nan_injection!(; odds::Int = 10, n_inject::Int = 1,
+                               functions::Array{FunctionRef} = FunctionRef[],
+                               libraries::Array{String} = String[])
   ft_config.inj.active    = true
   ft_config.inj.odds      = odds
-  ft_config.inj.n_inject   = n_inject
+  ft_config.inj.n_inject  = n_inject
   ft_config.inj.functions = functions
   ft_config.inj.libraries = libraries
 end
