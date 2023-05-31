@@ -25,7 +25,7 @@ These events are then stored in a buffered log and can be written out to a file 
 
 ## Usage
 
- 1. Call `using FloatTracker`; you may want to include functions like `enable_nan_injection!` or `set_logger_config!` or the like. (See below for more details.)
+ 1. Call `using FloatTracker`; you may want to include functions like `enable_nan_injection!` or `config_logger!` or the like. (See below for more details.)
  2. Add additional customization to logging and injection.
  3. Wrap as many of your inputs in `TrackedFloatN` as you can
 
@@ -47,7 +47,7 @@ Digging into step 2, there are two things that you can customize after initializ
 
 ```julia
 # Set log file basename to "whatever"; all log files have the timestamp prepended
-set_logger_config!(filename="whatever")
+config_logger!(filename="whatever")
 
 # There are three kinds of events that we log:
 #  - `:gen`  → when a NaN gets created from non-NaN arguments
@@ -59,7 +59,7 @@ set_logger_config!(filename="whatever")
 set_exclude_stacktrace!([:prop,:kill])
 ```
 
-Keyword arguments for `set_logger_config!`:
+Keyword arguments for `config_logger!`:
 
  - `filename::String` Basename of the file to write logs to.
 
@@ -98,7 +98,7 @@ enable_injection_recording!("ft_recording") # this is just the file basename; wi
 set_injection_replay!("20230530T145830-ft_recording.txt")
 ```
 
-Keyword arguments for `set_injector_config!`:
+Keyword arguments for `config_injector!`:
 
  - `active::Boolean` inject only if true
 
@@ -125,9 +125,9 @@ injection points is a union of the places matched by `functions` and `libraries`
 ## Example
 
 ```julia
-using FloatTracker: TrackedFloat16, write_out_logs, set_logger_config!, ft_init()
+using FloatTracker: TrackedFloat16, write_out_logs, config_logger!, ft_init()
 
-set_logger_config!(filename="max")
+config_logger!(filename="max")
 
 function maximum(lst)
   max_seen = 0.0

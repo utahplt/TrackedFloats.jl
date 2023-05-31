@@ -17,11 +17,11 @@ Massive configuration API rewrite. This should make it easier to maintain and ex
 
 ### Replaced functions
 
- - `set_logger(kwargs...)` → `set_logger_config!(kwargs...)`
+ - `set_logger(kwargs...)` → `config_logger!(kwargs...)`
 
    Continues to accept the same keyword arguments as the original function.
 
- - `set_inject_nan(args...)` → `set_injector_config!(kwargs...)`
+ - `set_inject_nan(args...)` → `config_injector!(kwargs...)`
 
    Instead of positional arguments, the injector function now takes keyword arguments. New keyword arguments and their defaults:
    
@@ -37,7 +37,7 @@ Massive configuration API rewrite. This should make it easier to maintain and ex
 
  - `set_exclude_stacktrace([:prop...])` → `set_exclude_stacktrace!([:prop...])`
 
-   Convenience function; you can also set the exclusions by using a keyword argument to `set_logger_config!`.
+   Convenience function; you can also set the exclusions by using a keyword argument to `config_logger!`.
 
 ## 0.0.0
 
