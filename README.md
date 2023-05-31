@@ -46,11 +46,20 @@ Digging into step 2, there are two things that you can customize after initializ
 ### Configuring the logger
 
 ```julia
-set_logger_config!(filename="whatever")        # set log file basename to "whatever"; files match "$timestamp-whatever_*.txt"
-set_exclude_stacktrace!([:prop,:gen,:kill])    # disable all event logging
+# Set log file basename to "whatever"; all log files have the timestamp prepended
+set_logger_config!(filename="whatever")
+
+# There are three kinds of events that we log:
+#  - `:gen`  → when a NaN gets created from non-NaN arguments
+#  - `:prop` → when a NaN argument leads to a NaN result
+#  - `:kill` → when a NaN argument does *not* lead to a NaN result
+#
+# If logs are too noisy, we can disable some or all of the logs. For example,
+# here we disable everything but NaN generation logging:
+set_exclude_stacktrace!([:prop,:kill])
 ```
 
-Options:
+Keyword arguments for `set_logger_config!`:
 
  - `filename::String` Basename of the file to write logs to.
 
@@ -89,7 +98,7 @@ enable_injection_recording!("ft_recording") # this is just the file basename; wi
 set_injection_replay!("20230530T145830-ft_recording.txt")
 ```
 
-Options:
+Keyword arguments for `set_injector_config!`:
 
  - `active::Boolean` inject only if true
 
