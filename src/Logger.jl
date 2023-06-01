@@ -1,31 +1,34 @@
 # Constructors
 
-mutable struct Logger
+mutable struct LogBuffer
   events::Array{Event}
 end
 
-logger = Logger([])
+log_buffer = LogBuffer([])
 
 function log_event(evt::Event)
-  push!(logger.events, evt)
+  push!(log_buffer.events, evt)
   if ft_config.log.printToStdOut
     println(to_string(evt))
   end
-  if length(logger.events) >= ft_config.log.buffersize
+  if length(log_buffer.events) >= ft_config.log.buffersize
     write_out_logs()
-    logger.events = []
+    log_buffer.events = []
   end
 end
 
 function write_out_logs()
-  write_log_to_file()
+  if ft_config.log.allErrors
+    write_error_logs()
+  end
+
   if ft_config.log.cstg
     write_logs_for_cstg()
   end
 end
 
 function print_log()
-  for e in logger.events
+  for e in log_buffer.events
     println(e)
   end
 end
@@ -35,12 +38,40 @@ end
 
 Flush error log.
 """
-function write_log_to_file()
-  if length(logger.events) > 0
+function write_error_logs()
+  if length(log_buffer.events) > 0
     open(errors_file(), "a") do file
-      for e in logger.events
+      for e in log_buffer.events
         write(file, "$(to_string(e))\n\n")
       end
+    end
+  end
+end
+
+function write_logs_for_cstg()
+  injects  = filter(e -> e.evt_type == :injected, log_buffer.events)
+  gens     = filter(e -> e.evt_type == :gen, log_buffer.events)
+  props    = filter(e -> e.evt_type == :prop, log_buffer.events)
+  kills    = filter(e -> e.evt_type == :kill, log_buffer.events)
+
+  if length(injects) > 0
+    open(injects_file(), "a") do file
+      write_events(file, injects)
+    end
+  end
+  if length(gens) > 0
+    open(gens_file(), "a") do file
+      write_events(file, gens)
+    end
+  end
+  if length(props) > 0
+    open(props_file(), "a") do file
+      write_events(file, props)
+    end
+  end
+  if length(kills) > 0
+    open(kills_file(), "a") do file
+      write_events(file, kills)
     end
   end
 end
@@ -88,33 +119,6 @@ function write_events(file, events::Vector{Event})
       end
 
       write(file, "\n")
-    end
-  end
-end
-
-function write_logs_for_cstg()
-  injects = filter(e -> e.evt_type == :injected, logger.events)
-  gens = filter(e -> e.evt_type == :gen, logger.events)
-  props = filter(e -> e.evt_type == :prop, logger.events)
-  kills = filter(e -> e.evt_type == :kill, logger.events)
-  if length(injects) > 0
-    open(injects_file(), "a") do file
-      write_events(file, injects)
-    end
-  end
-  if length(gens) > 0
-    open(gens_file(), "a") do file
-      write_events(file, gens)
-    end
-  end
-  if length(props) > 0
-    open(props_file(), "a") do file
-      write_events(file, props)
-    end
-  end
-  if length(kills) > 0
-    open(kills_file(), "a") do file
-      write_events(file, kills)
     end
   end
 end

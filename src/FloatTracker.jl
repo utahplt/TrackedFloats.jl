@@ -12,6 +12,7 @@ include("Logger.jl")            # Formatting and writing of error/event logs
 include("Injector.jl")          # NaN-injection logic
 include("TrackedFloat.jl")      # Principle datatype; overrides of all Base.* functions
 
+# Call ft_init() when module gets loaded up
 __init__() = ft_init()
 
 end

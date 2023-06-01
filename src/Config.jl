@@ -35,6 +35,8 @@ Struct containing all configuration for the logger.
 
  - `printToStdOut::Bool` Whether or not to write logs to STDOUT; defaults  to `false`.
 
+ - `allErrors::Bool` Record all errors in the `*_error_log.txt` file.
+
  - `cstg::Bool` Write logs in CSTG format.
 
  - `cstgLineNum::Bool` Include the line number in CSTG output.
@@ -51,6 +53,7 @@ mutable struct LoggerConfig
   filename::String
   buffersize::Int
   printToStdOut::Bool
+  allErrors::Bool
   cstg::Bool
   cstgLineNum::Bool
   cstgArgs::Bool
@@ -65,9 +68,9 @@ LoggerConfig(filename, buff_size) =
 LoggerConfig(filename, buff_size, cstg) =
   LoggerConfig(filename=filename, buffersize=buff_size, print=false, cstg=cstg, cstgLineNum=true, cstgArgs=true)
 
-function LoggerConfig(; filename="ft_log", buffersize=1000, print=false, cstg=false, cstgLineNum=true, cstgArgs=true,
-                      maxLogs=Unbounded(), maxFrames=Unbounded(), exclusions=[:prop])
-  LoggerConfig(filename, buffersize, print, cstg, cstgLineNum, cstgArgs, maxLogs, maxFrames, exclusions)
+function LoggerConfig(; filename="ft_log", buffersize=1000, print=false, cstg=true, cstgLineNum=true, cstgArgs=false,
+                      maxLogs=Unbounded(), maxFrames=Unbounded(), exclusions=[:prop], allErrors=false)
+  LoggerConfig(filename, buffersize, print, allErrors, cstg, cstgLineNum, cstgArgs, maxLogs, maxFrames, exclusions)
 end
 
 function injects_file()
@@ -164,16 +167,16 @@ mutable struct InjectorConfig
   replay_head::Int64
 end
 
-InjectorConfig(odds::Int64, n_inject::Int64) = InjectorConfig(odds=odds, n_inject=n_inject)
+InjectorConfig(odds::Int64, n_inject::Int64) = InjectorConfig(active=true, odds=odds, n_inject=n_inject)
 
-function InjectorConfig(; should_inject::Bool=true, odds::Int64=10, n_inject::Int64=1, functions=[], libraries=[], replay="", record="")
+function InjectorConfig(; active::Bool=false, odds::Int64=10, n_inject::Int64=1, functions=[], libraries=[], replay="", record="")
   script =
     if replay !== ""
       parse_replay_file(replay)
     else
       []
     end
-  return InjectorConfig(should_inject, odds, n_inject, functions, libraries, replay, record, 0, InjectorScript(script), 1)
+  return InjectorConfig(active, odds, n_inject, functions, libraries, replay, record, 0, InjectorScript(script), 1)
 end
 
 #
@@ -308,18 +311,18 @@ the number of NaNs to inject, and the functions/libraries in which to inject
 NaNs. Overrides unspecified arguments to their defaults.
 """
 function enable_nan_injection(n_inject::Int)
-  ft_config.inj.active    = true
-  ft_config.inj.n_inject  = n_inject
+  ft_config.inj.active = true
+  ft_config.inj.n_inject      = n_inject
 end
 
 function enable_nan_injection(; odds::Int = 10, n_inject::Int = 1,
                                functions::Array{FunctionRef} = FunctionRef[],
                                libraries::Array{String} = String[])
-  ft_config.inj.active    = true
-  ft_config.inj.odds      = odds
-  ft_config.inj.n_inject  = n_inject
-  ft_config.inj.functions = functions
-  ft_config.inj.libraries = libraries
+  ft_config.inj.active = true
+  ft_config.inj.odds          = odds
+  ft_config.inj.n_inject      = n_inject
+  ft_config.inj.functions     = functions
+  ft_config.inj.libraries     = libraries
 end
 
 """

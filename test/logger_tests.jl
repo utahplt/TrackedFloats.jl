@@ -19,14 +19,27 @@ f1(n) = f2(n+1)
 f0(n) = f1((n * n - 4.0) / (n - 2.0))
 
 @testset "maxFrames: only print out n stack frames" begin
-  tmp_file = tempname()         # This should automatically get cleaned up
-  # WORKING HERE: trying to make it so I can configure the logs to go out to the temp file
-  config_session!(testing=true)
-  config_logger!(filename=tmp_file, maxFrames=3, printToStdOut=true)
+  ft_init()
+  config_session(testing=true)
+  tmp1 = tempname()         # This should automatically get cleaned up
+  tmp2 = tempname()
 
   floaty = TrackedFloat32(2.0)
+
+  exclude_stacktrace([:kill,:inject])
+
+  config_logger(filename=tmp1, buffersize=1)
   f0(floaty)
   write_out_logs()
-  println("file: $tmp_file")
-  run(`cat $tmp_file`)
+
+  # We get 6 log events, and with this config there should be 6 lines + space
+  # for every event
+  @test countlines(tmp1) > 7 * 6
+
+  config_logger(filename=tmp2, maxFrames=3)
+  f0(floaty)
+  write_out_logs()
+
+  # We get the ((check_error line) + (3 lines of context) + (blank line) = 5) * (6 events)
+  @test countlines(tmp2) == 5 * 6
 end
