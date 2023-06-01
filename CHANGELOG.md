@@ -11,7 +11,7 @@ That said, this is research software, so expect some instability as we aim first
 Logger config:
 
  - `allErrors` controls whether or not to print to the catch-all `*_error_log.txt` file. (Now `false` by default.)
- - `maxFrames` controls how many stack frames get printed per event.
+ - `maxFrames` controls how many stack frames get printed per event. (`Unbounded` by default.)
 
 ### Replaced functions
 
