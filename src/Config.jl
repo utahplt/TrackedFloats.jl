@@ -247,7 +247,7 @@ config_session(ses::SessionConfig) = ft_config.ses = ses
 config_session(; args...) = patch_config!(ft_config.ses; args...)
 
 """
-    set_exclude_stacktrace!(exclusions = [:prop])
+    exclude_stacktrace(exclusions = [:prop])
 
 Globally set the types of stack traces to not collect.
 
@@ -257,26 +257,26 @@ that can be put into this list.
 Convenience function; You can also set the stack trace exclusions with
 a keyword argument to `config_logger`.
 """
-set_exclude_stacktrace!(exclusions = [:prop]) = ft_config.log.exclusions = exclusions
+exclude_stacktrace(exclusions = [:prop]) = ft_config.log.exclusions = exclusions
 
 """
-    enable_nan_injection!(n_inject::Int)
+    enable_nan_injection(n_inject::Int)
 
 Turn on NaN injection and injection `n_inject` NaNs. Does not modify odds,
 function and library lists, or recording/replay state.
 
-    enable_nan_injection!(; odds::Int = 10, n_inject::Int = 1, functions::Array{FunctionRef} = [], libraries::Array{String} = [])
+    enable_nan_injection(; odds::Int = 10, n_inject::Int = 1, functions::Array{FunctionRef} = [], libraries::Array{String} = [])
 
 Turn on NaN injection. Optionally configure the odds for injection, as well as
 the number of NaNs to inject, and the functions/libraries in which to inject
 NaNs. Overrides unspecified arguments to their defaults.
 """
-function enable_nan_injection!(n_inject::Int)
+function enable_nan_injection(n_inject::Int)
   ft_config.inj.active    = true
   ft_config.inj.n_inject  = n_inject
 end
 
-function enable_nan_injection!(; odds::Int = 10, n_inject::Int = 1,
+function enable_nan_injection(; odds::Int = 10, n_inject::Int = 1,
                                functions::Array{FunctionRef} = FunctionRef[],
                                libraries::Array{String} = String[])
   ft_config.inj.active    = true
@@ -287,24 +287,24 @@ function enable_nan_injection!(; odds::Int = 10, n_inject::Int = 1,
 end
 
 """
-    disable_nan_injection!()
+    disable_nan_injection()
 
 Turn off NaN injection.
 
-If you want to re-enable NaN injection after calling `disable_nan_injection!`,
-consider using the one-argument form of `enable_nan_injection!(n_inject::Int)`.
+If you want to re-enable NaN injection after calling `disable_nan_injection`,
+consider using the one-argument form of `enable_nan_injection(n_inject::Int)`.
 """
-disable_nan_injection!() = ft_config.inj.active = false
+disable_nan_injection() = ft_config.inj.active = false
 
 """
-    enable_injection_recording!(recording_file::String="ft_recording")
+    record_injection(recording_file::String="ft_recording")
 
 Turn on recording.
 """
-enable_injection_recording!(recording_file::String="ft_recording") = ft_config.inj.record = recording_file
+record_injection(recording_file::String="ft_recording") = ft_config.inj.record = recording_file
 
 """
-    set_injection_replay!(replay_file::String)
+    replay_injection(replay_file::String)
 
 Sets the injector to read from a replay file.
 
@@ -312,4 +312,4 @@ Note that this overwrites all previous configuration to the injector file, as
 once you are replaying an injection recording, all other configuration ceases to
 matter.
 """
-set_injection_replay!(replay_file::String) = ft_config.inj = InjectorConfig(replay=replay_file)
+replay_injection(replay_file::String) = ft_config.inj = InjectorConfig(replay=replay_file)

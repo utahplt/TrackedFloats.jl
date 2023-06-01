@@ -25,7 +25,7 @@ These events are then stored in a buffered log and can be written out to a file 
 
 ## Usage
 
- 1. Call `using FloatTracker`; you may want to include functions like `enable_nan_injection!` or `config_logger` or the like. (See below for more details.)
+ 1. Call `using FloatTracker`; you may want to include functions like `enable_nan_injection` or `config_logger` or the like. (See below for more details.)
  2. Add additional customization to logging and injection.
  3. Wrap as many of your inputs in `TrackedFloatN` as you can
 
@@ -56,7 +56,7 @@ config_logger(filename="whatever")
 #
 # If logs are too noisy, we can disable some or all of the logs. For example,
 # here we disable everything but NaN generation logging:
-set_exclude_stacktrace!([:prop,:kill])
+exclude_stacktrace([:prop,:kill])
 ```
 
 Keyword arguments for `config_logger`:
@@ -86,16 +86,16 @@ Keyword arguments for `config_logger`:
 
 ```julia
 # Inject 2 NaNs
-enable_nan_injection!(2)
+enable_nan_injection(2)
 
 # Inject 2 NaNs, except when in the function "nope" in "way.jl"
-enable_nan_injection!(n_inject=2, functions=[FunctionRef("nope", "way.jl")])
+enable_nan_injection(n_inject=2, functions=[FunctionRef("nope", "way.jl")])
 
 # Enable recording of injections
-enable_injection_recording!("ft_recording") # this is just the file basename; will have timestamp prepended
+record_injection("ft_recording") # this is just the file basename; will have timestamp prepended
 
 # Enable recording playback
-set_injection_replay!("20230530T145830-ft_recording.txt")
+replay_injection("20230530T145830-ft_recording.txt")
 ```
 
 Keyword arguments for `config_injector`:

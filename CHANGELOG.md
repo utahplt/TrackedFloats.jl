@@ -6,13 +6,21 @@ That said, this is research software, so expect some instability as we aim first
 
 ## 0.2.0
 
+### Replaced functions
+
 Rename to remove the `!` from functions:
 
  - `config_logger!` → `config_logger`
  - `config_injector!` → `config_injector`
  - `config_session!` → `config_session`
 
-TODO: need to still update other ! functions
+Similar and bigger function renames:
+
+ - `enable_nan_injection!` → `enable_nan_injection`
+ - `disable_nan_injection!` → `disable_nan_injection`
+ - `set_exclude_stacktrace!` → `exclude_stacktrace`
+ - `enable_injection_recording!` → `record_injection`
+ - `set_injection_replay!` → `replay_injection`
 
 ## 0.1.0
 
