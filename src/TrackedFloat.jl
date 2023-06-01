@@ -3,8 +3,12 @@ abstract type AbstractTrackedFloat <: AbstractFloat end
 @inline function check_error(fn, injected::Bool, result, args...)
   if any(v -> isfloaterror(v), [args..., result])
     # args is a tuple; we call `collect` to get a Vector without promoting the types
-    e = event(string(fn), collect(args), result, injected)
-    log_event(e)
+    if isa(ft_config.log.maxLogs, Int) && ft_config.log.maxLogs > 0
+      ft_config.log.maxLogs -= 1
+      log_event(event(string(fn), collect(args), result, injected))
+    else if isa(ft_config.log.maxLogs, Unbounded)
+      log_event(event(string(fn), collect(args), result, injected))
+    end
   end
 end
 
