@@ -78,7 +78,9 @@ Keyword arguments for `config_logger`:
 
  - `cstgArgs::Bool` Include arguments to functions in CSTG output.
 
- - `maxLogs::Union{Int,Unbounded}` Maximum number of events to log; defaults to `Unbounded`.
+ - `maxFrames::Union{Int,Unbounded}` Maximum number of frames to print per even in the logs; defaults to `Unbounded`.
+
+ - `maxLogs::Union{Int,Unbounded}` (Unimplemented as of 0.2.0) Maximum number of events to log; defaults to `Unbounded`.
 
  - `exclusions::Array{Symbol}` Events to not log; defaults to `[:prop]`.
 
