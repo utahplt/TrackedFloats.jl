@@ -4,6 +4,16 @@ We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in th
 
 That said, this is research software, so expect some instability as we aim first and foremost to push the boundaries of what is possible.
 
+## 0.2.0
+
+Rename to remove the `!` from functions:
+
+ - `config_logger!` → `config_logger`
+ - `config_injector!` → `config_injector`
+ - `config_session!` → `config_session`
+
+TODO: need to still update other ! functions
+
 ## 0.1.0
 
 Massive configuration API rewrite. This should make it easier to maintain and extend in the future.

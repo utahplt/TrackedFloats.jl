@@ -201,8 +201,8 @@ ft__get_global_ft_config_for_test() = ft_config
 export ft__get_global_ft_config_for_test
 
 """
-    config_logger!(log::LoggerConfig)
-    config_logger!(; args...)
+    config_logger(log::LoggerConfig)
+    config_logger(; args...)
 
 Set the logger for the global FloatTracker configuration instance.
 
@@ -213,12 +213,12 @@ In the case where only a few arguments are specified, it will override only
 those fields, i.e. the entire LoggerConfig won't be replaced. This is useful,
 for example, if you need to adjust a field in the middle of a test.
 """
-config_logger!(log::LoggerConfig) = ft_config.log = log
-config_logger!(; args...) = patch_config!(ft_config.log; args...)
+config_logger(log::LoggerConfig) = ft_config.log = log
+config_logger(; args...) = patch_config!(ft_config.log; args...)
 
 """
-    config_injector!(log::InjectorConfig)
-    config_injector!(; args...)
+    config_injector(log::InjectorConfig)
+    config_injector(; args...)
 
 Set the injector for the global FloatTracker configuration instance.
 
@@ -226,14 +226,14 @@ Takes either a `InjectorConfig` struct, or the same keyword arguments as the
 `InjectorConfig` constructor.
 
 Passing a partial list of keyword arguments has the same behavior as it does
-with `config_logger!`.
+with `config_logger`.
 """
-config_injector!(inj::InjectorConfig) = ft_config.inj = inj
-config_injector!(; args...) = patch_config!(ft_config.inj; args...)
+config_injector(inj::InjectorConfig) = ft_config.inj = inj
+config_injector(; args...) = patch_config!(ft_config.inj; args...)
 
 """
-    config_session!(log::SessionConfig)
-    config_session!(; args...)
+    config_session(log::SessionConfig)
+    config_session(; args...)
 
 Set the session for the global FloatTracker configuration instance.
 
@@ -241,10 +241,10 @@ Takes either a `SessionConfig` struct, or the same keyword arguments as the
 `SessionConfig` constructor.
 
 Passing a partial list of keyword arguments has the same behavior as it does
-with `config_logger!`.
+with `config_logger`.
 """
-config_session!(ses::SessionConfig) = ft_config.ses = ses
-config_session!(; args...) = patch_config!(ft_config.ses; args...)
+config_session(ses::SessionConfig) = ft_config.ses = ses
+config_session(; args...) = patch_config!(ft_config.ses; args...)
 
 """
     set_exclude_stacktrace!(exclusions = [:prop])
@@ -255,7 +255,7 @@ See documentation for the `event()` function for details on the types of events
 that can be put into this list.
 
 Convenience function; You can also set the stack trace exclusions with
-a keyword argument to `config_logger!`.
+a keyword argument to `config_logger`.
 """
 set_exclude_stacktrace!(exclusions = [:prop]) = ft_config.log.exclusions = exclusions
 
