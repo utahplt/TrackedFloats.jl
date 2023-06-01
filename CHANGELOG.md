@@ -6,6 +6,13 @@ That said, this is research software, so expect some instability as we aim first
 
 ## 0.2.0
 
+### Added
+
+Logger config:
+
+ - `allErrors` controls whether or not to print to the catch-all `*_error_log.txt` file. (Now `false` by default.)
+ - `maxFrames` controls how many stack frames get printed per event.
+
 ### Replaced functions
 
 Rename to remove the `!` from functions:
