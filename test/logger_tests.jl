@@ -43,3 +43,28 @@ f0(n) = f1((n * n - 4.0) / (n - 2.0))
   # We get the ((check_error line) + (3 lines of context) + (blank line) = 5) * (6 events)
   @test countlines(tmp2) == 5 * 6
 end
+
+@testset "maxLogs: only log n events then stop" begin
+  ft_init()
+  config_session(testing=true)
+  tmp1 = tempname()         # This should automatically get cleaned up
+  tmp2 = tempname()
+
+  floaty = TrackedFloat32(2.0)
+
+  exclude_stacktrace([:kill,:inject])
+
+  config_logger(filename=tmp1, maxFrames=1, buffersize=1)
+  f0(floaty)
+  write_out_logs()
+
+  # We get the ((check_error line) + (1 lines of context) + (blank line) = 3) * (6 events)
+  @test countlines(tmp1) == 18
+
+  config_logger(filename=tmp2, maxLogs=3)
+  f0(floaty)
+  write_out_logs()
+
+  # We get the ((check_error line) + (1 lines of context) + (blank line) = 3) * (3 events)
+  @test countlines(tmp2) == 9
+end

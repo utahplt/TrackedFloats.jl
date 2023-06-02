@@ -6,7 +6,7 @@ abstract type AbstractTrackedFloat <: AbstractFloat end
     if isa(ft_config.log.maxLogs, Int) && ft_config.log.maxLogs > 0
       ft_config.log.maxLogs -= 1
       log_event(event(string(fn), collect(args), result, injected))
-    else if isa(ft_config.log.maxLogs, Unbounded)
+    elseif isa(ft_config.log.maxLogs, Unbounded)
       log_event(event(string(fn), collect(args), result, injected))
     end
   end
