@@ -4,6 +4,12 @@ We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in th
 
 That said, this is research software, so expect some instability as we aim first and foremost to push the boundaries of what is possible.
 
+## 0.3.0
+
+### Added
+
+Event limit in logger works: set `maxLogs` to control how many events get logged. FloatTracker stops collecting stack traces after this, so should run much faster once the threshold has been hit. Defaults to `Unbounded()`.
+
 ## 0.2.0
 
 ### Added
