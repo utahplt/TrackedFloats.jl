@@ -22,7 +22,6 @@ end
 end
 
 for TrackedFloatN in (:TrackedFloat16, :TrackedFloat32, :TrackedFloat64)
-
   # FloatN is the base float type derived from TrackedFloatN
   @eval FloatN = $(Symbol("Float", string(TrackedFloatN)[end-1:end]))
 
@@ -68,6 +67,7 @@ for TrackedFloatN in (:TrackedFloat16, :TrackedFloat32, :TrackedFloat64)
   end
 
   number_types = (:Number, :Integer, :Float16, :Float32, :Float64)
+  complex_types = (:ComplexF16, :ComplexF32, :ComplexF64)
 
   for NumType in number_types
     @eval function Base.ldexp(x::$NumType, y::$TrackedFloatN)
@@ -86,8 +86,19 @@ for TrackedFloatN in (:TrackedFloat16, :TrackedFloat32, :TrackedFloat64)
       $TrackedFloatN(r)
     end
 
+
     # Hack to appease type dispatch
     for NumType in tuple(:Bool, number_types...)
+      # FIXME: work on this here!
+      @eval function Base.$O(x::Complex{$TrackedFloatN}, y::Complex{$TrackedFloatN})
+      end
+
+      @eval function Base.$O(x::Complex{$NumType}, y::$TrackedFloatN)
+      end
+
+      @eval function Base.$O(x::$TrackedFloatN, y::Complex{$NumType})
+      end
+
       @eval function Base.$O(x::$NumType, y::$TrackedFloatN)
         (r, injected) = run_or_inject($O, x, y.val)
         check_error($O, injected, r, x, y.val)
@@ -175,5 +186,4 @@ for TrackedFloatN in (:TrackedFloat16, :TrackedFloat32, :TrackedFloat64)
       r
     end
   end
-
-end
+end                             # for TrackedFloatN
