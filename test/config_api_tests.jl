@@ -1,13 +1,12 @@
 using Test
 
-include("../src/FloatTracker.jl")
-using .FloatTracker
+using FloatTracker
 
 @testset "config_* doesn't override everything" begin
   global_config = ft__get_global_ft_config_for_test()
   mirror = FtConfig(LoggerConfig(),
-                           InjectorConfig(),
-                           SessionConfig())
+                    InjectorConfig(),
+                    SessionConfig())
   mirror.log.filename = global_config.log.filename
   @test "$global_config" == "$mirror"
 

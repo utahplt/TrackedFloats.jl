@@ -11,3 +11,6 @@ include("logger_tests.jl")
 
 println("--- recording session tests ---")
 include("recording_session_tests.jl")
+
+println("--- complex number tests ---")
+include("complex_test.jl")

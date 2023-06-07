@@ -1,8 +1,6 @@
 using Test
 
-println("Loading FloatTracker…")
-include("../src/FloatTracker.jl")
-using .FloatTracker
+using FloatTracker
 
 println("FloatTracker loaded")
 
