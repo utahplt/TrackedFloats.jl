@@ -49,11 +49,28 @@ for TrackedFloatN in (:TrackedFloat16, :TrackedFloat32, :TrackedFloat64)
     $TrackedFloatN(x::$TrackedFloatN) = $TrackedFloatN(x.val)
     $TrackedFloatN(x::Bool) = $TrackedFloatN($FloatN(x))
 
+    # Tracking a Complex struct returns a complex number with component parts
+    # wrapped in a TrackedFloat struct
+    $TrackedFloatN(x::Complex{}) = tf_track_complex(x)
+
     Base.promote_rule(::Type{<:Integer},::Type{$TrackedFloatN}) = $TrackedFloatN
     Base.promote_rule(::Type{Float64},::Type{$TrackedFloatN}) = $TrackedFloatN
     Base.promote_rule(::Type{Float32},::Type{$TrackedFloatN}) = $TrackedFloatN
     Base.promote_rule(::Type{Float16},::Type{$TrackedFloatN}) = $TrackedFloatN
     Base.promote_rule(::Type{Bool},::Type{$TrackedFloatN}) = $TrackedFloatN
+  end
+
+  # Helper functions for working with complex numbers
+  @eval function tf_to_complex(real::$TrackedFloatN, imaginary::$TrackedFloatN=$TrackedFloatN(0.0))
+    Complex(real, imaginary)
+  end
+
+  @eval function tf_track_complex(c::Complex{$FloatN})
+    Complex($TrackedFloatN(c.re), $TrackedFloatN(c.im))
+  end
+
+  @eval function tf_untrack_complex(c::Complex{$TrackedFloatN})
+    Complex(c.re.val, c.im.val)
   end
 
   # Use this where an int got wrapped with a TrackedFloat
@@ -86,19 +103,30 @@ for TrackedFloatN in (:TrackedFloat16, :TrackedFloat32, :TrackedFloat64)
       $TrackedFloatN(r)
     end
 
+    @eval function Base.$O(x::Complex{$TrackedFloatN}, y::Complex{$TrackedFloatN})
+      xx = tf_untrack_complex(x)
+      yy = tf_untrack_complex(y)
+      (r, injected) = run_or_inject($O, xx, yy)
+      check_error($O, injected, r, xx, yy)
+      $TrackedFloatN(r)
+    end
+
+    @eval function Base.$O(x::Complex{}, y::$TrackedFloatN)
+      xx = tf_untrack_complex(x)
+      (r, injected) = run_or_inject($O, xx, y.val)
+      check_error($O, injected, r, xx, y.val)
+      $TrackedFloatN(r)
+    end
+
+    @eval function Base.$O(x::$TrackedFloatN, y::Complex{})
+      yy = tf_untrack_complex(y)
+      (r, injected) = run_or_inject($O, x.val, yy)
+      check_error($O, injected, r, x.val, yy)
+      $TrackedFloatN(r)
+    end
 
     # Hack to appease type dispatch
     for NumType in tuple(:Bool, number_types...)
-      # FIXME: work on this here!
-      @eval function Base.$O(x::Complex{$TrackedFloatN}, y::Complex{$TrackedFloatN})
-      end
-
-      @eval function Base.$O(x::Complex{$NumType}, y::$TrackedFloatN)
-      end
-
-      @eval function Base.$O(x::$TrackedFloatN, y::Complex{$NumType})
-      end
-
       @eval function Base.$O(x::$NumType, y::$TrackedFloatN)
         (r, injected) = run_or_inject($O, x, y.val)
         check_error($O, injected, r, x, y.val)
