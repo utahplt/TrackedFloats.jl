@@ -24,8 +24,6 @@ jobs:
         with:
           version: '1.9'
       - uses: julia-actions/julia-buildpkg@v1
-      - name: "Install test package"
-        run: julia -E 'import Pkg; Pkg.add("Test")'
       - uses: julia-actions/julia-runtest@v1
         env:
           USE_DEV: "false"

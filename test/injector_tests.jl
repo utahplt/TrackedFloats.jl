@@ -4,6 +4,9 @@ using FloatTracker
 
 @testset "should_inject basic behavior" begin
   i1 = InjectorConfig(active=true, odds=1, n_inject=2)
+  @test i1.active
+  @test i1.n_inject > 0
+  @test rand(1:i1.odds) == 1
   @test should_inject(i1)
 
   i2 = InjectorConfig(active=true, odds=1, n_inject=0)
