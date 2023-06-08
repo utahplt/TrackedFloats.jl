@@ -1,5 +1,7 @@
 # FloatTracker.jl
 
+[![CI](https://github.com/utahplt/FloatTracker.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/utahplt/FloatTracker.jl/actions/workflows/CI.yml)
+
 Track `NaN` generation and propagation in your code.
 
 Inspired by [Sherlogs.jl](https://github.com/milankl/Sherlogs.jl).
