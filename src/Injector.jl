@@ -30,6 +30,7 @@ function should_inject(i::InjectorConfig)::Bool
 
   if i.active && i.n_inject > 0 && rand(1:i.odds) == 1
     st = stacktrace()
+    pp_frames(st)
     if i.record !== ""
       # We're recording this
       did_injectp = injectable_region(i, st)
@@ -170,6 +171,6 @@ end
 
 function pp_frames(frames::StackTraces.StackTrace)
   for f::StackTraces.StackFrame in frames
-    println("$(f.func) at $(f.file):$(f.line)")
+    println("$(f.func) at $(f.file):$(f.line) ==> lib: $(frame_library(f))")
   end
 end
