@@ -106,12 +106,22 @@ function format_cstg_stackframe(sf::StackTraces.StackFrame, frame_args::Vector{}
   "$(func)$(args) at $(sf.file)$(linenum)"
 end
 
+function category(e::Event)
+  if e.category == :nan
+    "NaN"
+  elseif e.category == :inf
+    "Inf"
+  else
+    ""
+  end
+end
+
 function write_events(file, events::Vector{Event})
   for e in events
     if length(e.trace) > 0
 
       # correct args in top frame so it's the values not just the traces
-      write(file, "$(format_cstg_stackframe(e.trace[1], e.args))\n")
+      write(file, "[$(category(e))] $(format_cstg_stackframe(e.trace[1], e.args))\n")
 
       # write remaining frames up to ftv-config.log.maxFrames
       for sf in e.trace[(isa(ft_config.log.maxFrames, Unbounded) ? (2:end) : (2:(ft_config.log.maxFrames + 1)))]

@@ -29,7 +29,12 @@ end
 """
     Event
 
-Struct representing some event in the life of a NaN.
+Struct representing some exceptional floating point event.
+
+`category` options:
+
+ - `:nan`
+ - `:inf`
 
 `evt_type` options:
 
@@ -39,6 +44,7 @@ Struct representing some event in the life of a NaN.
  - `:kill`
 """
 struct Event
+  category::Symbol
   evt_type::Symbol
   op::String
   args::Array{Any}

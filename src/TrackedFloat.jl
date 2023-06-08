@@ -5,9 +5,9 @@ abstract type AbstractTrackedFloat <: AbstractFloat end
     # args is a tuple; we call `collect` to get a Vector without promoting the types
     if isa(ft_config.log.maxLogs, Int) && ft_config.log.maxLogs > 0
       ft_config.log.maxLogs -= 1
-      log_event(event(string(fn), collect(args), result, injected))
+      map(log_event, event(string(fn), collect(args), result, injected))
     elseif isa(ft_config.log.maxLogs, Unbounded)
-      log_event(event(string(fn), collect(args), result, injected))
+      map(log_event, event(string(fn), collect(args), result, injected))
     end
   end
 end
@@ -149,7 +149,7 @@ for TrackedFloatN in (:TrackedFloat16, :TrackedFloat32, :TrackedFloat64)
 
   @eval function Base.decompose(x::$TrackedFloatN)
     if isnan(x)
-      event("decompose", [x], (0,0,0)) # Log the kill
+      map(log_event, event("decompose", [x], (0,0,0))) # Log the kill
     end
     Base.decompose(x.val)
   end

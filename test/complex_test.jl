@@ -24,5 +24,5 @@ end
 
   scotty_tt = TrackedFloat64(0.0 + 1.0im) / 0
 
-  @test countlines(tmp1) == 5
+  @test countlines(tmp1) == 10  # 5 for the NaN, 5 for the Inf
 end
