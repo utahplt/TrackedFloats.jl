@@ -157,13 +157,13 @@ function frame_library(frame::StackTraces.StackFrame) # ::Union{String,Nothing}
   # first try from a data structure; if that doesn't work use the hacky string-based method that can work for inlined functions.
   name = getmodule(frame)
   if isnothing(name)
-    # FIXME: this doesn't work with packages that are checked out locally
-    lib = match(r".julia[\\/](packages|dev|scratchspaces)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", String(frame.file))
+    # lib = match(r".julia[\\/](packages|dev|scratchspaces)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", String(frame.file))
+    lib = match(r"[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/](src|test)[\\/]", String(frame.file))
 
     if isnothing(lib)
       return nothing
     else
-      return "$(lib.captures[2])"
+      return "$(lib.captures[1])"
     end
   end
   return "$name"
