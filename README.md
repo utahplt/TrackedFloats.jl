@@ -2,11 +2,7 @@
 
 [![CI](https://github.com/utahplt/FloatTracker.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/utahplt/FloatTracker.jl/actions/workflows/CI.yml)
 
-Track `NaN` generation and propagation in your code.
-
-Inspired by [Sherlogs.jl](https://github.com/milankl/Sherlogs.jl).
-
-This repository originally lived in [Taylor Allred's repository](https://github.com/tcallred/FloatTracker.jl).
+Track `NaN` and `Inf` generation and propagation in your code.
 
 # Examples
 
@@ -15,13 +11,13 @@ Examples have been moved from this repository to an [example repository](https:/
 # Description
 
 `FloatTracker.jl` is a library that provides three new types: `TrackedFloat16`, `TrackedFloat32`, and `TrackedFloat64`.
-These behave just like their `FloatN` counterparts except that they detect and log instances of `NaN`.
+These behave just like their `FloatN` counterparts except that they detect and log instances of exceptional floating point values. (E.g. `NaN` or `Inf`)
 
-If a `NaN` appears in a primitive floating point operation (such as `+`, `-`, `abs`, `sin` etc.), it generates an event:
+There are three kinds of events that can happen during the lifetime of an exceptional floating point value:
 
-- **GEN**: the operation generated a `NaN` as a result (e.g. `0.0 / 0.0 -> NaN`)
-- **PROP**: the operation propagated a `NaN` from its arguments (e.g. `NaN + 2.0 -> NaN`)
-- **KILL**: the operation had a `NaN` in its arguments but not in its result (e.g. `NaN > 1.0 -> false`)
+- **GEN**: the operation generated an exceptional value as a result (e.g. `0.0 / 0.0 → NaN`)
+- **PROP**: the operation propagated an exceptional value from arguments to result (e.g. `NaN + 2.0 → NaN`, `2.0 / 0.0 → Inf`)
+- **KILL**: the operation had an exceptional value in its arguments but not in its result (e.g. `NaN > 1.0 → false`)
 
 These events are then stored in a buffered log and can be written out to a file during or after the execution of a program.
 
@@ -29,7 +25,7 @@ These events are then stored in a buffered log and can be written out to a file 
 
  1. Call `using FloatTracker`; you may want to include functions like `enable_nan_injection` or `config_logger` or the like. (See below for more details.)
  2. Add additional customization to logging and injection.
- 3. Wrap as many of your inputs in `TrackedFloatN` as you can
+ 3. Wrap as many of your inputs in `TrackedFloatN` as you can.
 
 FloatTracker should take care of the rest!
 
@@ -87,6 +83,8 @@ Keyword arguments for `config_logger`:
  - `exclusions::Array{Symbol}` Events to not log; defaults to `[:prop]`.
 
 ### Configuring the injector
+
+FloatTracker can *inject* `NaN`s at random points in your program to help you find places where you might not be handling exceptional values properly: this technique can help you find `NaN` kills before they happen in a production environment.
 
 ```julia
 # Inject 2 NaNs
@@ -273,10 +271,15 @@ pkg> activate .
 (FloatTracker) pkg> test
 ```
 
-
 # License
 
 MIT License
+
+# History
+
+Inspired by [Sherlogs.jl](https://github.com/milankl/Sherlogs.jl).
+
+This repository originally lived in [Taylor Allred's repository](https://github.com/tcallred/FloatTracker.jl).
 
 # Authors
 

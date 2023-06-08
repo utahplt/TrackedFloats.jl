@@ -77,9 +77,6 @@ function write_logs_for_cstg()
 end
 
 function format_cstg_stackframe(sf::StackTraces.StackFrame, frame_args::Vector{} = [])
-  # if log_config.cstgArgs && log_config.cstgLineNum && isempty(frame_args)
-  #   return "$(sf)"
-  # end
   func = String(sf.func)        # FIXME/TODO: can we make sure the function name here is well-formed for CSTG's digestion?
   linfo = "$(sf.linfo)"
   args = if ft_config.log.cstgArgs && isempty(frame_args)
@@ -94,8 +91,6 @@ function format_cstg_stackframe(sf::StackTraces.StackFrame, frame_args::Vector{}
   else
     ""
   end
-
-  # println("linfo: $linfo; args: $args")
 
   linenum = if ft_config.log.cstgLineNum
     ":$(sf.line)"
