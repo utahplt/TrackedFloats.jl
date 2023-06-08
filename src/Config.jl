@@ -142,6 +142,10 @@ Struct describing parameters for injecting NaNs
 
  - `libraries::Array{String}` if given, only inject NaNs when within this library.
 
+   **NOTE**: Libraries MUST NOT have a `.jl` suffix—we strip out that suffix
+   when looking for the name of a library by default, so don't include it here
+   otherwise it will never match.
+
  - `record::String` if given, record injection invents in a way that can be
    replayed later with the `replay` argument.
 

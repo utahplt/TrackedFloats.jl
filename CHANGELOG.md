@@ -4,6 +4,24 @@ We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in th
 
 That said, this is research software, so expect some instability as we aim first and foremost to push the boundaries of what is possible.
 
+## 0.4.0
+
+This release includes a shiny new CI pipeline. It's pretty bare-bones right now, but it does run our (sparse) set of unit tests automatically, so that's nice!
+
+### Added
+
+Basic support for complex numbers. All you need to do is this:
+
+```julia
+TrackedFloat64(1.0 + 2.0im)
+```
+
+Note that support is *rudimentary* for now—don't expect too much, and let us know if you need any more functionality than what is currently working.
+
+### Changed
+
+Improved the last-ditch effort to extract the module name from a stack frame. Note that in order for the `libraries` exclusion option to work, the libraries here MUST NOT have the `.jl` suffix. This is noted in the documentation for `InjectorConfig`.
+
 ## 0.3.0
 
 ### Added

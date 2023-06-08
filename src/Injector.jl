@@ -30,7 +30,6 @@ function should_inject(i::InjectorConfig)::Bool
 
   if i.active && i.n_inject > 0 && rand(1:i.odds) == 1
     st = stacktrace()
-    pp_frames(st)
     if i.record !== ""
       # We're recording this
       did_injectp = injectable_region(i, st)
@@ -157,8 +156,7 @@ function frame_library(frame::StackTraces.StackFrame) # ::Union{String,Nothing}
   # first try from a data structure; if that doesn't work use the hacky string-based method that can work for inlined functions.
   name = getmodule(frame)
   if isnothing(name)
-    # lib = match(r".julia[\\/](packages|dev|scratchspaces)[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/]", String(frame.file))
-    lib = match(r"[\\/]([a-zA-Z][a-zA-Z0-9_.-]*)[\\/](src|test)[\\/]", String(frame.file))
+    lib = match(r"[\\/]([a-zA-Z][a-zA-Z0-9_-]*)(\.jl)?[\\/](src|test)[\\/]", String(frame.file))
 
     if isnothing(lib)
       return nothing
