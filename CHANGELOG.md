@@ -4,6 +4,12 @@ We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in th
 
 That said, this is research software, so expect some instability as we aim first and foremost to push the boundaries of what is possible.
 
+## 0.5.0
+
+### Added
+
+Tracks `Inf` as well as `NaN` kills/gens. Logging controls are still coarse-grained: e.g. excluding `:props` excludes props to both. No `Inf` injections at this time, just tracking.
+
 ## 0.4.0
 
 This release includes a shiny new CI pipeline. It's pretty bare-bones right now, but it does run our (sparse) set of unit tests automatically, so that's nice!
