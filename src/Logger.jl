@@ -12,7 +12,10 @@ function log_event(evt::Event)
     println(to_string(evt))
   end
   if length(log_buffer.events) >= ft_config.log.buffersize
-    write_out_logs()
+    if isa(ft_config.log.maxLogs, Int) && ft_config.log.maxLogs > 0
+      write_out_logs()
+      ft_config.log.maxLogs -= length(log_buffer.events)
+    end
     log_buffer.events = []
   end
 end

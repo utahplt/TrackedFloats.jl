@@ -4,6 +4,10 @@ We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in th
 
 That said, this is research software, so expect some instability as we aim first and foremost to push the boundaries of what is possible.
 
+## 0.5.1
+
+Fix `maxLogs` parameter to only count towards events not excluded by `exclude_stacktrace`.
+
 ## 0.5.0
 
 ### Added

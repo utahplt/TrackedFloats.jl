@@ -4,7 +4,8 @@ abstract type AbstractTrackedFloat <: AbstractFloat end
   if any(v -> isfloaterror(v), [args..., result])
     # args is a tuple; we call `collect` to get a Vector without promoting the types
     if isa(ft_config.log.maxLogs, Int) && ft_config.log.maxLogs > 0
-      ft_config.log.maxLogs -= 1
+      # We do not decrement at this point: that happens in the logger so we get
+      # the right amount of logs of the *kind* that we want.
       map(log_event, event(string(fn), collect(args), result, injected))
     elseif isa(ft_config.log.maxLogs, Unbounded)
       map(log_event, event(string(fn), collect(args), result, injected))
