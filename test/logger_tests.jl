@@ -28,7 +28,7 @@ f0(n) = f1((n * n - 4.0) / (n - 2.0))
 
   config_logger(filename=tmp1, buffersize=1)
   f0(floaty)
-  write_out_logs()
+  ft_flush_logs()
 
   # We get 6 log events, and with this config there should be 6 lines + space
   # for every event
@@ -36,7 +36,7 @@ f0(n) = f1((n * n - 4.0) / (n - 2.0))
 
   config_logger(filename=tmp2, maxFrames=3)
   f0(floaty)
-  write_out_logs()
+  ft_flush_logs()
 
   # We get the ((check_error line) + (3 lines of context) + (blank line) = 5) * (6 events)
   @test countlines(tmp2) == 5 * 6
@@ -54,14 +54,14 @@ end
 
   config_logger(filename=tmp1, maxFrames=1, buffersize=1)
   f0(floaty)
-  write_out_logs()
+  ft_flush_logs()
 
   # We get the ((check_error line) + (1 lines of context) + (blank line) = 3) * (6 events)
   @test countlines(tmp1) == 18
 
   config_logger(filename=tmp2, maxLogs=3)
   f0(floaty)
-  write_out_logs()
+  ft_flush_logs()
 
   # We get the ((check_error line) + (1 lines of context) + (blank line) = 3) * (3 events)
   @test countlines(tmp2) == 9

@@ -127,7 +127,7 @@ injection points is a union of the places matched by `functions` and `libraries`
 ## Example
 
 ```julia
-using FloatTracker: TrackedFloat16, write_out_logs, config_logger, ft_init()
+using FloatTracker: TrackedFloat16, ft_flush_logs, config_logger, ft_init()
 
 config_logger(filename="max")
 
@@ -154,7 +154,7 @@ println("--- With builtin max ---")
 res2 = maximum2([TrackedFloat16(x) for x in [1, NaN, 4]]).val
 println("Result: $(res2)")
 
-write_out_logs()
+ft_flush_logs()
 ```
 
 This code shows two different implementations of a max-element function.

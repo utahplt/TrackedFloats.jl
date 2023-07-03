@@ -1,7 +1,7 @@
 # Run this by entering the Julia REPL and running
    # include("test/logger_perf_tests.jl")
 
-using FloatTracker: TrackedFloat64, write_out_logs, exclude_stacktrace, set_logger
+using FloatTracker: TrackedFloat64, ft_flush_logs, exclude_stacktrace, set_logger
 using FileIO, Profile, FlameGraphs, Plots, ProfileView
 
 function track(loops)
