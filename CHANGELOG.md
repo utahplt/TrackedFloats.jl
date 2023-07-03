@@ -6,7 +6,13 @@ That said, this is research software, so expect some instability as we aim first
 
 ## 0.6.0
 
-Rename `write_out_logs` → `ft_flush_logs`.
+### Fixed
+
+ - Bug: setting `maxLogs` to `Unbounded` would fail to write logs to file.
+
+### Changed
+
+ - Rename `write_out_logs` → `ft_flush_logs`.
 
 ## 0.5.1
 
