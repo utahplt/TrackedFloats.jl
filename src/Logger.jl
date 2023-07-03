@@ -8,13 +8,16 @@ log_buffer = LogBuffer([])
 
 function log_event(evt::Event)
   push!(log_buffer.events, evt)
+
   if ft_config.log.printToStdOut
     println(to_string(evt))
   end
   if length(log_buffer.events) >= ft_config.log.buffersize
-    if isa(ft_config.log.maxLogs, Int) && ft_config.log.maxLogs > 0
+    if isa(ft_config.log.maxLogs, Unbounded) || (isa(ft_config.log.maxLogs, Int) && ft_config.log.maxLogs > 0)
       ft_flush_logs()
-      ft_config.log.maxLogs -= length(log_buffer.events)
+      if isa(ft_config.log.maxLogs, Int)
+        ft_config.log.maxLogs -= length(log_buffer.events)
+      end
     end
     log_buffer.events = []
   end
