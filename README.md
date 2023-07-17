@@ -254,6 +254,11 @@ Generate a graph using the error log:
 
 Open `output_basename.pdf` to see the CSTG.
 
+# Julia and GPU programming
+
+FloatTracker works on the CPU. If a Julia function calls a GPU kernel, then you can track exceptions inside the GPU execution using our companion tool [GPU-FPX](https://github.com/LLNL/GPU-FPX) developed by Xinyi Li for her PhD. This will allow you to (1) see the exception flows inside the kernel, (2) whether the exceptions got killed inside the kernel, and if the exceptions were present in the return result of the Julia GPU call, then (3) FloatTracker will show how that exception further flows through the Julia code. You get this full effect by running your Julia Command under `LD_PRELOAD`. 
+
+For details of `LD_PRELOAD` and to obtain and install GPU-FPX, please visit the [GPU-FPX repository](https://github.com/LLNL/GPU-FPX) and ask its authors for assistance if needed. For help on using FloatTracker in conjunction with this tool, talk to us.
 
 # Running tests
 
