@@ -1,8 +1,14 @@
 # Changelog
 
-We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in the spec](https://semver.org/#semantic-versioning-specification-semver), until the API stabilizes and we make an official `1.0.0` release, expect new features and/or breaking changes with every update to the minor version number. Patch numbers will continue to be backwards-compatible with a given minor version number.
+We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in the spec](https://semver.org/#semantic-versioning-specification-semver), versions prior to `1.0.0` have new features and/or breaking changes with every update to the minor version number. Patch numbers will continue to be backwards-compatible with a given minor version number.
 
 That said, this is research software, so expect some instability as we aim first and foremost to push the boundaries of what is possible.
+
+## 1.0.0
+
+Release the package!
+
+We are pretty happy with where the API is at this point, and we want to release a good initial version before JuliaCon 2023. No major changes since 0.6.0.
 
 ## 0.6.0
 

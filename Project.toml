@@ -1,7 +1,7 @@
 name = "FloatTracker"
 uuid = "1722352a-da05-4a89-9ace-0f2f7ef630bb"
 authors = ["Taylor Allred <taylor.allred21@gmail.com>", "Ashton Wiersdorf <mail@wiersdorf.dev>", "Ben Greenman <benjaminlgreenman@gmail.com>"]
-version = "0.6.0"
+version = "1.0.0"
 
 [deps]
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
