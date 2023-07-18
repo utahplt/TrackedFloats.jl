@@ -4,9 +4,21 @@
 
 Track `NaN` and `Inf` generation and propagation in your code.
 
-# Examples
+# Synopsis
 
-Examples have been moved from this repository to an [example repository](https://github.com/utahplt/FloatTrackerExamples)—this allows us to keep the dependencies in this repository nice and light.
+```julia
+# Pull in FloatTracker
+using FloatTracker
+
+# Wrap inputs in a TrackedFloat* type
+num = TrackedFloat64(-42.0)
+
+# Watch as a NaN gets born
+should_be_nan = sqrt(num)
+
+# Flush FloatTracker's logs
+ft_flush_logs()
+```
 
 # Description
 
@@ -15,11 +27,70 @@ These behave just like their `FloatN` counterparts except that they detect and l
 
 There are three kinds of events that can happen during the lifetime of an exceptional floating point value:
 
+![Life cycle of an exceptional value](./exception_lifecycle.png "The birth, death, and times of a NaN")
+
 - **GEN**: the operation generated an exceptional value as a result (e.g. `0.0 / 0.0 → NaN`)
 - **PROP**: the operation propagated an exceptional value from arguments to result (e.g. `NaN + 2.0 → NaN`, `2.0 / 0.0 → Inf`)
 - **KILL**: the operation had an exceptional value in its arguments but not in its result (e.g. `NaN > 1.0 → false`)
 
 These events are then stored in a buffered log and can be written out to a file during or after the execution of a program.
+
+## Example
+```julia
+using FloatTracker
+
+config_logger(filename="max")
+
+function maximum(lst)
+  max_seen = 0.0
+  for x in lst
+    if ! (x < max_seen)
+      max_seen = x              # swap if new val greater
+    end
+  end
+  max_seen
+end
+
+function maximum2(lst)
+  foldl(max, lst)
+end
+
+println("--- With less than ---")
+res = maximum(TrackedFloat32.([1, 5, 4, NaN, 4])).val
+println("Result: $(res)")
+println()
+
+println("--- With builtin max ---")
+res2 = maximum2(TrackedFloat32.([1, 5, 4, NaN, 4])).val
+println("Result: $(res2)")
+
+ft_flush_logs()
+```
+
+This code shows two different implementations of a max-element function.
+One uses the builtin `<` operator and the other uses Julia's `max` function. When encountering a `NaN` the `<` will "kill" it (always returning `false`) and the `max` function will "prop" it (always returning back the `NaN`).
+
+Note that the result of this program is *wrong*: instead of the true maximum value of the list (`5.0`) getting returned, the bad version returns `4.0`!
+
+We can see this in the log that produced by FloatTracker when running this file.
+
+```
+[NaN] check_error at /Users/ashton/.julia/dev/FloatTracker/src/TrackedFloat.jl:11
+< at /Users/ashton/.julia/dev/FloatTracker/src/TrackedFloat.jl:214
+maximum at /Users/ashton/Research/FloatTrackerExamples/max_example.jl:0
+top-level scope at /Users/ashton/Research/FloatTrackerExamples/max_example.jl:20
+eval at ./boot.jl:370
+include_string at ./loading.jl:1899
+_include at ./loading.jl:1959
+include at ./Base.jl:457
+exec_options at ./client.jl:307
+_start at ./client.jl:522
+
+…
+```
+
+This is an example of a program where two different implementations can result in a different answer when dealing with `NaN` in the input. In a larger program, the presence of `NaN` can produce incorrect results.
+This tool may be useful for debugging those sorts of issues.
 
 ## Usage
 
@@ -124,64 +195,6 @@ Keyword arguments for `config_injector`:
 `functions` and `libraries` work together as a union: i.e. the set of possible NaN
 injection points is a union of the places matched by `functions` and `libraries`.
 
-## Example
-
-```julia
-using FloatTracker
-
-config_logger(filename="max")
-
-function maximum(lst)
-  max_seen = 0.0
-  for x in lst
-    if ! (x < max_seen)
-      max_seen = x              # swap if new val greater
-    end
-  end
-  max_seen
-end
-
-function maximum2(lst)
-  foldl(max, lst)
-end
-
-println("--- With less than ---")
-res = maximum(TrackedFloat32.([1, 5, 4, NaN, 4])).val
-println("Result: $(res)")
-println()
-
-println("--- With builtin max ---")
-res2 = maximum2(TrackedFloat32.([1, 5, 4, NaN, 4])).val
-println("Result: $(res2)")
-
-ft_flush_logs()
-```
-
-This code shows two different implementations of a max-element function.
-One uses the builtin `<` operator and the other uses Julia's `max` function. When encountering a `NaN` the `<` will "kill" it (always returning `false`) and the `max` function will "prop" it (always returning back the `NaN`).
-
-Note that the result of this program is *wrong*: instead of the true maximum value of the list (`5.0`) getting returned, the bad version returns `4.0`!
-
-We can see this in the log that produced by FloatTracker when running this file.
-
-```
-[NaN] check_error at /Users/ashton/.julia/dev/FloatTracker/src/TrackedFloat.jl:11
-< at /Users/ashton/.julia/dev/FloatTracker/src/TrackedFloat.jl:214
-maximum at /Users/ashton/Research/FloatTrackerExamples/foodbar.jl:0
-top-level scope at /Users/ashton/Research/FloatTrackerExamples/foodbar.jl:20
-eval at ./boot.jl:370
-include_string at ./loading.jl:1899
-_include at ./loading.jl:1959
-include at ./Base.jl:457
-exec_options at ./client.jl:307
-_start at ./client.jl:522
-
-…
-```
-
-This is an example of a program where two different implementations can result in a different answer when dealing with `NaN` in the input. In a larger program, the presence of `NaN` can produce incorrect results.
-This tool may be useful for debugging those sorts of issues.
-
 ## Known operations that can kill a NaN
 
 ```
@@ -242,6 +255,9 @@ For more about CSTG, please see the original paper:
 > Alan Humphrey, Qingyu Meng, Martin Berzins, Diego Caminha Barbosa De Oliveira, Zvonimir Rakamaric, Ganesh Gopalakrishnan:
 > Systematic Debugging Methods for Large-Scale HPC Computational Frameworks. Comput. Sci. Eng. 16(3): 48-56 (2014)
 
+# Examples
+
+Examples have been moved from this repository to an [example repository](https://github.com/utahplt/FloatTrackerExamples)—this allows us to keep the dependencies in this repository nice and light.
 
 # Julia and GPU programming
 
