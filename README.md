@@ -127,14 +127,14 @@ injection points is a union of the places matched by `functions` and `libraries`
 ## Example
 
 ```julia
-using FloatTracker: TrackedFloat16, ft_flush_logs, config_logger, ft_init()
+using FloatTracker
 
 config_logger(filename="max")
 
 function maximum(lst)
   max_seen = 0.0
   for x in lst
-    if ! (x <= max_seen)
+    if ! (x < max_seen)
       max_seen = x              # swap if new val greater
     end
   end
@@ -146,12 +146,12 @@ function maximum2(lst)
 end
 
 println("--- With less than ---")
-res = maximum([TrackedFloat16(x) for x in [1, 5, 4, NaN, 4]]).val
+res = maximum(TrackedFloat32.([1, 5, 4, NaN, 4])).val
 println("Result: $(res)")
 println()
 
 println("--- With builtin max ---")
-res2 = maximum2([TrackedFloat16(x) for x in [1, NaN, 4]]).val
+res2 = maximum2(TrackedFloat32.([1, 5, 4, NaN, 4])).val
 println("Result: $(res2)")
 
 ft_flush_logs()
@@ -160,42 +160,25 @@ ft_flush_logs()
 This code shows two different implementations of a max-element function.
 One uses the builtin `<` operator and the other uses Julia's `max` function. When encountering a `NaN` the `<` will "kill" it (always returning `false`) and the `max` function will "prop" it (always returning back the `NaN`).
 
+Note that the result of this program is *wrong*: instead of the true maximum value of the list (`5.0`) getting returned, the bad version returns `4.0`!
+
 We can see this in the log that produced by FloatTracker when running this file.
 
 ```
-KILL 1.0,NaN -> < -> false
- 	check_error at TrackedFloat.jl:14 [inlined]
-	check_error at TrackedFloat.jl:13 [inlined]
-	<(x::TrackedFloat16, y::TrackedFloat16) at TrackedFloat.jl:112
-	maximum(lst::Vector{TrackedFloat16}) at max.jl:9
-	top-level scope at max.jl:22
+[NaN] check_error at /Users/ashton/.julia/dev/FloatTracker/src/TrackedFloat.jl:11
+< at /Users/ashton/.julia/dev/FloatTracker/src/TrackedFloat.jl:214
+maximum at /Users/ashton/Research/FloatTrackerExamples/foodbar.jl:0
+top-level scope at /Users/ashton/Research/FloatTrackerExamples/foodbar.jl:20
+eval at ./boot.jl:370
+include_string at ./loading.jl:1899
+_include at ./loading.jl:1959
+include at ./Base.jl:457
+exec_options at ./client.jl:307
+_start at ./client.jl:522
 
-PROP 1.0,NaN -> max -> NaN
- 	check_error at TrackedFloat.jl:14 [inlined]
-	max(x::TrackedFloat16, y::TrackedFloat16) at TrackedFloat.jl:64
-	BottomRF at reduce.jl:81 [inlined]
-	_foldl_impl at reduce.jl:62 [inlined]
-	foldl_impl at reduce.jl:48 [inlined]
-	mapfoldl_impl at reduce.jl:44 [inlined]
-	#mapfoldl#259 at reduce.jl:170 [inlined]
-	mapfoldl at reduce.jl:170 [inlined]
-	#foldl#260 at reduce.jl:193 [inlined]
-	foldl at reduce.jl:193 [inlined]
-	maximum2(lst::Vector{TrackedFloat16}) at max.jl:17
-
-PROP NaN,4.0 -> max -> NaN
- 	check_error at TrackedFloat.jl:14 [inlined]
-	max(x::TrackedFloat16, y::TrackedFloat16) at TrackedFloat.jl:64
-	BottomRF at reduce.jl:81 [inlined]
-	_foldl_impl at reduce.jl:62 [inlined]
-	foldl_impl at reduce.jl:48 [inlined]
-	mapfoldl_impl at reduce.jl:44 [inlined]
-	#mapfoldl#259 at reduce.jl:170 [inlined]
-	mapfoldl at reduce.jl:170 [inlined]
-	#foldl#260 at reduce.jl:193 [inlined]
-	foldl at reduce.jl:193 [inlined]
-	maximum2(lst::Vector{TrackedFloat16}) at max.jl:17
+…
 ```
+
 This is an example of a program where two different implementations can result in a different answer when dealing with `NaN` in the input. In a larger program, the presence of `NaN` can produce incorrect results.
 This tool may be useful for debugging those sorts of issues.
 
@@ -216,7 +199,7 @@ Most of the time comparison operators are what kill a NaN. But `^` can kill NaNs
 
 FloatTracker allows you to fuzz code and inject NaNs wherever a `TrackedFloat` type is used. Moreover, you can record these injections to rerun injections.
 
-**ACHTUNG:** it is critical that inputs to the program be exactly the same for recording and replaying to be consistent. The recordings are sensitive to the number of times a floating point operation is hit.
+**WARNING:** it is critical that inputs to the program be exactly the same for recording and replaying to be consistent. The recordings are sensitive to the number of times a floating point operation is hit.
 
 **TODO:** describe how to set up a recording and replay it.
 
@@ -254,6 +237,12 @@ Generate a graph using the error log:
 
 Open `output_basename.pdf` to see the CSTG.
 
+For more about CSTG, please see the original paper:
+
+> Alan Humphrey, Qingyu Meng, Martin Berzins, Diego Caminha Barbosa De Oliveira, Zvonimir Rakamaric, Ganesh Gopalakrishnan:
+> Systematic Debugging Methods for Large-Scale HPC Computational Frameworks. Comput. Sci. Eng. 16(3): 48-56 (2014)
+
+
 # Julia and GPU programming
 
 FloatTracker works on the CPU. If a Julia function calls a GPU kernel, then you can track exceptions inside the GPU execution using our companion tool [GPU-FPX](https://github.com/LLNL/GPU-FPX) developed by Xinyi Li for her PhD. This will allow you to (1) see the exception flows inside the kernel, (2) whether the exceptions got killed inside the kernel, and if the exceptions were present in the return result of the Julia GPU call, then (3) FloatTracker will show how that exception further flows through the Julia code. You get this full effect by running your Julia Command under `LD_PRELOAD`. 
@@ -286,8 +275,20 @@ Inspired by [Sherlogs.jl](https://github.com/milankl/Sherlogs.jl).
 
 This repository originally lived in [Taylor Allred's repository](https://github.com/tcallred/FloatTracker.jl).
 
+# Citation
+
+If you use this library in your work, please cite us:
+
+> (citation forthcoming)
+
+# Acknowledgments
+
+This work was performed under the auspices of the U.S. Department of Energy by the University of Utah under Award DE-SC0022252 and NSF CISE Awards 1956106, 2124100, and 2217154.
+
 # Authors
 
  - [Taylor Allred](https://github.com/tcallred)
  - [Ashton Wiersdorf](https://github.com/ashton314)
+ - [Xinyi Li](https://github.com/xinyi-li7) (GPU-FPX)
  - [Ben Greenman](https://github.com/bennn)
+ - [Ganesh Gopalakrishnan](https://users.cs.utah.edu/~ganesh/)
