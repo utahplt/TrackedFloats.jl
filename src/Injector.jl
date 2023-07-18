@@ -75,7 +75,7 @@ function handle_replay(i::InjectorConfig)::Bool
   # Match?
   if place === script[head].counter && ff === script[head].check
     i.replay_head += 1
-    println("Injecting NaN from replay point $place; file $(script[head].check)")
+    # println("Injecting NaN from replay point $place; file $(script[head].check)")
     return true
   elseif place === script[head].counter && ff !== script[head].check
     @error "At replay point $place but current file $ff ≠ $(script[head].check)"

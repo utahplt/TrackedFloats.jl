@@ -8,6 +8,7 @@ using FloatTracker
                     InjectorConfig(),
                     SessionConfig())
   mirror.log.filename = global_config.log.filename
+  mirror.ses.sessionId = global_config.ses.sessionId
   @test "$global_config" == "$mirror"
 
   config_injector(active=true, odds=42)
