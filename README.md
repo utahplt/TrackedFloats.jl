@@ -4,6 +4,8 @@
 
 Track `NaN` and `Inf` generation and propagation in your code.
 
+Available on [JuliaHub](https://juliahub.com/ui/Packages/FloatTracker/dBXig/1.0.0)
+
 # Synopsis
 
 ```julia
