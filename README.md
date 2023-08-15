@@ -210,13 +210,21 @@ NaN ^  0.0 → 1.0
 
 Most of the time comparison operators are what kill a NaN. But `^` can kill NaNs too.
 
-# Recording NaN injections
+# Fuzzing and Recording NaN injections
 
 FloatTracker allows you to fuzz code and inject NaNs wherever a `TrackedFloat` type is used. Moreover, you can record these injections to rerun injections.
 
 **WARNING:** it is critical that inputs to the program be exactly the same for recording and replaying to be consistent. The recordings are sensitive to the number of times a floating point operation is hit.
 
 **TODO:** describe how to set up a recording and replay it.
+
+## Injection decision
+
+This diagram shows how we decide at a given point whether or not to inject a NaN:
+
+![Flow diagram for NaN injection](./injection_decision.png)
+
+The checks in the purple region cost the most time, so we do those as late as possible.
 
 ## Recording sessions
 
