@@ -119,9 +119,23 @@ function parse_replay_file(replay::String)::Array{ReplayPoint}
   return [parse_replay_line(l) for l in readlines(replay)]
 end
 
+replay_file_stack_delimiter = " \\\\ "
+export replay_file_stack_delimiter
+
 function parse_replay_line(line::String)::ReplayPoint
-  m = match(r"^(\d+), ([^,]*), (.*)$", line)
-  return ReplayPoint(parse(Int64, m.captures[1]), Symbol(m.captures[2]), split(m.captures[3]))
+  m4 = match(r"^(\d+), ([^,]*), ([^,]*), (.*)$", line)
+  if m4 != nothing
+    m = m4
+    return ReplayPoint(parse(Int64, m.captures[1]), parse(Float64, m.captures[2]), Symbol(m.captures[3]), split(m.captures[4], replay_file_stack_delimiter))
+  else
+    m3 = match(r"^(\d+), ([^,]*), (.*)$", line)
+    if m3 != nothing
+      m = m3
+      return ReplayPoint(parse(Int64, m.captures[1]), NaN, Symbol(m.captures[2]), split(m.captures[3], replay_file_stack_delimiter))
+    else
+      @error "Unexpected line in replay file: $(line)"
+    end
+  end
 end
 
 """
@@ -130,6 +144,8 @@ Struct describing parameters for injecting NaNs
 ## Fields
 
  - `active::Boolean` inject only if true
+
+ - `value::Any` what value to inject; typically `NaN` or `Inf`
 
  - `n_inject::Int` maximum number of NaNs to inject; gets decremented every time
    a NaN gets injected
@@ -158,6 +174,7 @@ injection points is a union of the places matched by `functions` and `libraries`
 """
 mutable struct InjectorConfig
   active::Bool
+  value::Any
   odds::Int64
   n_inject::Int64
   functions::Array{FunctionRef}
@@ -171,16 +188,16 @@ mutable struct InjectorConfig
   replay_head::Int64
 end
 
-InjectorConfig(odds::Int64, n_inject::Int64) = InjectorConfig(active=true, odds=odds, n_inject=n_inject)
+InjectorConfig(odds::Int64, n_inject::Int64, value::Any=NaN) = InjectorConfig(active=true, value=value, odds=odds, n_inject=n_inject)
 
-function InjectorConfig(; active::Bool=false, odds::Int64=10, n_inject::Int64=1, functions=[], libraries=[], replay="", record="")
+function InjectorConfig(; active::Bool=false, value::Any=NaN, odds::Int64=10, n_inject::Int64=1, functions=[], libraries=[], replay="", record="")
   script =
     if replay !== ""
       parse_replay_file(replay)
     else
       []
     end
-  return InjectorConfig(active, odds, n_inject, functions, libraries, replay, record, 0, InjectorScript(script), 1)
+  return InjectorConfig(active, value, odds, n_inject, functions, libraries, replay, record, 0, InjectorScript(script), 1)
 end
 
 #
@@ -315,14 +332,37 @@ the number of NaNs to inject, and the functions/libraries in which to inject
 NaNs. Overrides unspecified arguments to their defaults.
 """
 function enable_nan_injection(n_inject::Int)
+  enable_injection(n_inject, NaN)
+end
+
+function enable_inf_injection(n_inject::Int)
+  enable_injection(n_inject, Inf)
+end
+
+function enable_injection(n_inject::Int, value::Any)
   ft_config.inj.active = true
   ft_config.inj.n_inject      = n_inject
+  ft_config.inj.value = value
 end
 
 function enable_nan_injection(; odds::Int = 10, n_inject::Int = 1,
                                functions::Array{FunctionRef} = FunctionRef[],
                                libraries::Array{String} = String[])
+  enable_injection(value=NaN, odds=odds, n_inject=n_inject, functions=functions, libraries=libraries)
+end
+
+function enable_inf_injection(; odds::Int = 10, n_inject::Int = 1,
+                               functions::Array{FunctionRef} = FunctionRef[],
+                               libraries::Array{String} = String[])
+  enable_injection(value=Inf, odds=odds, n_inject=n_inject, functions=functions, libraries=libraries)
+end
+
+function enable_injection(; odds::Int = 10, n_inject::Int = 1, value::Any = NaN,
+                            functions::Array{FunctionRef} = FunctionRef[],
+                            libraries::Array{String} = String[])
+
   ft_config.inj.active = true
+  ft_config.inj.value = value
   ft_config.inj.odds          = odds
   ft_config.inj.n_inject      = n_inject
   ft_config.inj.functions     = functions
@@ -338,6 +378,8 @@ If you want to re-enable NaN injection after calling `disable_nan_injection`,
 consider using the one-argument form of `enable_nan_injection(n_inject::Int)`.
 """
 disable_nan_injection() = ft_config.inj.active = false
+disable_inf_injection() = ft_config.inj.active = false
+disable_injection() = ft_config.inj.active = false
 
 """
     record_injection(recording_file::String="ft_recording")

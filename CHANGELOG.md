@@ -4,6 +4,10 @@ We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in th
 
 That said, this is research software, so expect some instability as we aim first and foremost to push the boundaries of what is possible.
 
+## 1.0.1
+
+Enable Inf injection (issue [#41](https://github.com/utahplt/FloatTracker.jl/issues/41))
+
 ## 1.0.0
 
 Release the package!

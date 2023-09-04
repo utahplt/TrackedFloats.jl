@@ -4,13 +4,13 @@ using Base.Iterators
 """
     should_inject(i::InjectorConfig)
 
-Return whether or not we should inject a `NaN`.
+Return whether or not we should inject.
 
 Decision process:
 
  - Checks whether or not the given injector is active.
 
- - Checks that there are some NaNs remaining to inject.
+ - Checks that there are some values left to inject.
 
  - Rolls an `InjectorConfig.odds`-sided die; if 1, proceed, otherwise, don't do
    anything.
@@ -50,13 +50,13 @@ export should_inject            # only for testing
 function make_replay_point(i::InjectorConfig, st::StackTraces.StackTrace)::ReplayPoint
   this_file = frame_file(drop_ft_frames(st)[1])
   short_frames = map((f -> "$(frame_library(f)):$(frame_file(f)):$(frame_line(f))"), drop_ft_frames(st))
-  ReplayPoint(i.place_counter, Symbol(this_file), short_frames)
+  ReplayPoint(i.place_counter, i.value, Symbol(this_file), short_frames)
 end
 
 function write_replay_point(i::InjectorConfig, rp::ReplayPoint)
   fh = open(i.record, "a")
-  short_frames = join(rp.stack, " ")
-  println(fh, "$(rp.counter), $(rp.check), $short_frames")
+  short_frames = join(rp.stack, replay_file_stack_delimiter)
+  println(fh, "$(rp.counter), $(rp.value), $(rp.check), $short_frames")
   close(fh)
 end
 
@@ -75,10 +75,11 @@ function handle_replay(i::InjectorConfig)::Bool
   # Match?
   if place === script[head].counter && ff === script[head].check
     i.replay_head += 1
-    # println("Injecting NaN from replay point $place; file $(script[head].check)")
+    # println("Injecting $(i.value) from replay point $place; file $(script[head].check)")
     return true
   elseif place === script[head].counter && ff !== script[head].check
-    @error "At replay point $place but current file $ff ≠ $(script[head].check)"
+    @error "At replay point $place but current file $ff ≠ $(script[head].check) goddam $(script[head].value)"
+    exit(1)
   elseif place > script[head].counter
     @error "Replay point skipped"
   end
@@ -98,7 +99,7 @@ end
     injectable_region(i::InjectorConfig, frames::StackTrace)::Bool
 
 Returns whether or not the current point in the code (indicated by the
-StackTrace) is a valid point to inject a NaN.
+StackTrace) is a valid point to inject.
 """
 function injectable_region(i::InjectorConfig, raw_frames::StackTraces.StackTrace)::Bool
   # Drop FloatTracker frames

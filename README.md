@@ -112,7 +112,6 @@ Digging into step 2, there are two things that you can customize after initializ
 
    Optional—default is to not inject. If you want to try injecting NaNs to fuzz your code, this is where you control when that happens.
 
-*Coming soon: injection sessions to run a series of fuzzes.*
 
 ### Configuring the logger
 
@@ -210,13 +209,12 @@ NaN ^  0.0 → 1.0
 
 Most of the time comparison operators are what kill a NaN. But `^` can kill NaNs too.
 
-# Fuzzing and Recording NaN injections
+# Fuzzing and Recording injections
 
-FloatTracker allows you to fuzz code and inject NaNs wherever a `TrackedFloat` type is used. Moreover, you can record these injections to rerun injections.
+FloatTracker allows you to fuzz code and inject NaNs or Infs wherever a `TrackedFloat` type is used. Moreover, you can record these injections to rerun injections.
 
 **WARNING:** it is critical that inputs to the program be exactly the same for recording and replaying to be consistent. The recordings are sensitive to the number of times a floating point operation is hit.
 
-**TODO:** describe how to set up a recording and replay it.
 
 ## Injection decision
 

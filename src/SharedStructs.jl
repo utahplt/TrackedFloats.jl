@@ -16,12 +16,13 @@ FunctionRef(name :: String, file, avoid) = FunctionRef(Symbol(name), file, avoid
 FunctionRef(name :: Symbol, file :: String, avoid) = FunctionRef(name, Symbol(file), avoid)
 
 """
-    ReplayPoint(counter, check, module_list)
+    ReplayPoint(counter, value, check, module_list)
 
-Represents a point where a `NaN` was injected during program execution.
+Represents a point where a value was injected during program execution.
 """
 struct ReplayPoint
   counter::Int64
+  value::Any
   check::Symbol
   stack::Vector{String}
 end

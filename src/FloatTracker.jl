@@ -2,7 +2,7 @@ module FloatTracker
 
 export FtConfig, ft_init, TrackedFloat16, TrackedFloat32, TrackedFloat64, FunctionRef
 export LoggerConfig, config_logger, exclude_stacktrace, print_log, ft_flush_logs
-export InjectorConfig, config_injector, enable_nan_injection, disable_nan_injection, record_injection, replay_injection
+export InjectorConfig, config_injector, enable_nan_injection, disable_nan_injection, enable_inf_injection, disable_inf_injection, record_injection, replay_injection
 export SessionConfig, config_session
 
 include("SharedStructs.jl")     # Structures used in multiple places throughout FloatTracker

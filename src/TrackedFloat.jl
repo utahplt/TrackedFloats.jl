@@ -16,7 +16,7 @@ end
 @inline function run_or_inject(fn, args...)
   if should_inject(ft_config.inj)
     decrement_injections(ft_config.inj)
-    (NaN, true)
+    (ft_config.inj.value, true)
   else
     (fn(args...), false)
   end
