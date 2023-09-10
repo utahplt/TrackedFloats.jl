@@ -39,7 +39,7 @@ These events are then stored in a buffered log and can be written out to a file 
 
 JuliaCon 2023 talk by Ashton:
 
-[<img src="https://github.com/utahplt/FloatTracker.jl/assets/1731829/661b7d36-ca5f-489f-bda4-30591ebb25d7" />](https://www.youtube.com/live/rMrHCM1Etng?si=fK0Y3WYiFOzJYQ4V&t=10147)
+<a href="https://www.youtube.com/live/rMrHCM1Etng?si=fK0Y3WYiFOzJYQ4V&t=10147"><img src="https://github.com/utahplt/FloatTracker.jl/assets/1731829/661b7d36-ca5f-489f-bda4-30591ebb25d7" /></a>
 
 
 ## Example
