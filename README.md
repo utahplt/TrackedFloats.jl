@@ -37,6 +37,11 @@ There are three kinds of events that can happen during the lifetime of an except
 
 These events are then stored in a buffered log and can be written out to a file during or after the execution of a program.
 
+JuliaCon 2023 talk by Ashton:
+
+[![](https://img.youtube.com/vi/rMrHCM1Etng/0.jpg)](https://www.youtube.com/live/rMrHCM1Etng?si=fK0Y3WYiFOzJYQ4V&t=10147)
+
+
 ## Example
 ```julia
 using FloatTracker
