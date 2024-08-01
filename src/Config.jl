@@ -1,5 +1,5 @@
 #
-# Unified config for FloatTracker
+# Unified config for TrackedFloats
 # ===============================
 #
 # Contents:
@@ -218,7 +218,7 @@ function SessionConfig()
 end
 
 """
-FloatTracker config struct
+TrackedFloats config struct
 
 ## Logger Config
 ## Injector Config
@@ -240,7 +240,7 @@ ft_config = nothing
 """
     ft_init()
 
-Initialize the global FloatTracker configuration. (Automatically called when using function by `__init__`)
+Initialize the global TrackedFloats configuration. (Automatically called when using function by `__init__`)
 
 We need to make this a function, otherwise it can cache the value of the
 timestamp used for writing unique log files.
@@ -264,7 +264,7 @@ export ft__get_global_ft_config_for_test
     config_logger(log::LoggerConfig)
     config_logger(; args...)
 
-Set the logger for the global FloatTracker configuration instance.
+Set the logger for the global TrackedFloats configuration instance.
 
 Takes either a `LoggerConfig` struct, or the same keyword arguments as the
 `LoggerConfig` constructor.
@@ -280,7 +280,7 @@ config_logger(; args...) = patch_config!(ft_config.log; args...)
     config_injector(log::InjectorConfig)
     config_injector(; args...)
 
-Set the injector for the global FloatTracker configuration instance.
+Set the injector for the global TrackedFloats configuration instance.
 
 Takes either a `InjectorConfig` struct, or the same keyword arguments as the
 `InjectorConfig` constructor.
@@ -295,7 +295,7 @@ config_injector(; args...) = patch_config!(ft_config.inj; args...)
     config_session(log::SessionConfig)
     config_session(; args...)
 
-Set the session for the global FloatTracker configuration instance.
+Set the session for the global TrackedFloats configuration instance.
 
 Takes either a `SessionConfig` struct, or the same keyword arguments as the
 `SessionConfig` constructor.

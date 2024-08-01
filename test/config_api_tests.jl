@@ -1,6 +1,6 @@
 using Test
 
-using FloatTracker
+using TrackedFloats
 
 @testset "config_* doesn't override everything" begin
   global_config = ft__get_global_ft_config_for_test()

@@ -1,4 +1,4 @@
-name = "FloatTracker"
+name = "TrackedFloats"
 uuid = "1722352a-da05-4a89-9ace-0f2f7ef630bb"
 authors = ["Taylor Allred <taylor.allred21@gmail.com>", "Ashton Wiersdorf <mail@wiersdorf.dev>", "Ben Greenman <benjaminlgreenman@gmail.com>"]
 version = "1.0.1"

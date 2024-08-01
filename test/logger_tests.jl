@@ -1,8 +1,8 @@
 using Test
 
-using FloatTracker
+using TrackedFloats
 
-println("FloatTracker loaded")
+println("TrackedFloats loaded")
 
 f5(n) = n-2
 

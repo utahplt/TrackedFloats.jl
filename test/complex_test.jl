@@ -1,5 +1,5 @@
 using Test
-using FloatTracker
+using TrackedFloats
 
 @testset "Constructing tracked complex numbers" begin
   scotty_tt = 0.0 + 1.0im           # Our imaginary friend

@@ -1,6 +1,6 @@
 using Test
 
-using FloatTracker
+using TrackedFloats
 
 @testset "should_inject basic behavior" begin
   i1 = InjectorConfig(active=true, odds=1, n_inject=2)

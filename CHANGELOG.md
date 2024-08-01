@@ -6,7 +6,7 @@ That said, this is research software, so expect some instability as we aim first
 
 ## 1.0.1
 
-Enable Inf injection (issue [#41](https://github.com/utahplt/FloatTracker.jl/issues/41))
+Enable Inf injection (issue [#41](https://github.com/utahplt/TrackedFloats.jl/issues/41))
 
 ## 1.0.0
 
@@ -56,7 +56,7 @@ Improved the last-ditch effort to extract the module name from a stack frame. No
 
 ### Added
 
-Event limit in logger works: set `maxLogs` to control how many events get logged. FloatTracker stops collecting stack traces after this, so should run much faster once the threshold has been hit. Defaults to `Unbounded()`.
+Event limit in logger works: set `maxLogs` to control how many events get logged. TrackedFloats stops collecting stack traces after this, so should run much faster once the threshold has been hit. Defaults to `Unbounded()`.
 
 ## 0.2.0
 

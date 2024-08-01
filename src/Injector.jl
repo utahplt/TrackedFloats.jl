@@ -92,7 +92,7 @@ end
 end
 
 @inline function drop_ft_frames(frames)
-  collect(Iterators.dropwhile((frame -> frame_library(frame) === "FloatTracker"), frames))
+  collect(Iterators.dropwhile((frame -> frame_library(frame) === "TrackedFloats"), frames))
 end
 
 """
@@ -102,7 +102,7 @@ Returns whether or not the current point in the code (indicated by the
 StackTrace) is a valid point to inject.
 """
 function injectable_region(i::InjectorConfig, raw_frames::StackTraces.StackTrace)::Bool
-  # Drop FloatTracker frames
+  # Drop TrackedFloats frames
   frames = drop_ft_frames(raw_frames)
 
   # If neither functions nor libraries are specified, inject as long as we're

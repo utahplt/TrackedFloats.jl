@@ -1,16 +1,18 @@
-# FloatTracker.jl
+# TrackedFloats.jl (formerly FloatTracker.jl)
 
-[![CI](https://github.com/utahplt/FloatTracker.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/utahplt/FloatTracker.jl/actions/workflows/CI.yml)
+⚠️ **NOTICE** ⚠️ we are in the process of renaming FloatTracker → TrackedFloats to bring this inline with Julia package naming conventions. Please be patient.
+
+[![CI](https://github.com/utahplt/TrackedFloats.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/utahplt/TrackedFloats.jl/actions/workflows/CI.yml)
 
 Track `NaN` and `Inf` generation and propagation in your code.
 
-Available on [JuliaHub](https://juliahub.com/ui/Packages/FloatTracker/dBXig/1.0.0)
+Available on [JuliaHub](https://juliahub.com/ui/Packages/TrackedFloats/dBXig/1.0.0)
 
 # Synopsis
 
 ```julia
-# Pull in FloatTracker
-using FloatTracker
+# Pull in TrackedFloats
+using TrackedFloats
 
 # Wrap inputs in a TrackedFloat* type
 num = TrackedFloat64(-42.0)
@@ -18,13 +20,13 @@ num = TrackedFloat64(-42.0)
 # Watch as a NaN gets born
 should_be_nan = sqrt(num)
 
-# Flush FloatTracker's logs
+# Flush TrackedFloats's logs
 ft_flush_logs()
 ```
 
 # Description
 
-`FloatTracker.jl` is a library that provides three new types: `TrackedFloat16`, `TrackedFloat32`, and `TrackedFloat64`.
+`TrackedFloats.jl` is a library that provides three new types: `TrackedFloat16`, `TrackedFloat32`, and `TrackedFloat64`.
 These behave just like their `FloatN` counterparts except that they detect and log instances of exceptional floating point values. (E.g. `NaN` or `Inf`)
 
 There are three kinds of events that can happen during the lifetime of an exceptional floating point value:
@@ -41,12 +43,12 @@ JuliaCon 2023 talk by Ashton:
 
 <a href="https://www.youtube.com/live/rMrHCM1Etng?si=fK0Y3WYiFOzJYQ4V&t=10147"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/1731829/266869983-661b7d36-ca5f-489f-bda4-30591ebb25d7.png" /></a>
 
-<!-- https://github.com/utahplt/FloatTracker.jl/assets/1731829/661b7d36-ca5f-489f-bda4-30591ebb25d7 -->
+<!-- https://github.com/utahplt/TrackedFloats.jl/assets/1731829/661b7d36-ca5f-489f-bda4-30591ebb25d7 -->
 
 
 ## Example
 ```julia
-using FloatTracker
+using TrackedFloats
 
 config_logger(filename="max")
 
@@ -81,13 +83,13 @@ One uses the builtin `<` operator and the other uses Julia's `max` function. Whe
 
 Note that the result of this program is *wrong*: instead of the true maximum value of the list (`5.0`) getting returned, the bad version returns `4.0`!
 
-We can see this in the log that produced by FloatTracker when running this file.
+We can see this in the log that produced by TrackedFloats when running this file.
 
 ```
-[NaN] check_error at /Users/ashton/.julia/dev/FloatTracker/src/TrackedFloat.jl:11
-< at /Users/ashton/.julia/dev/FloatTracker/src/TrackedFloat.jl:214
-maximum at /Users/ashton/Research/FloatTrackerExamples/max_example.jl:0
-top-level scope at /Users/ashton/Research/FloatTrackerExamples/max_example.jl:20
+[NaN] check_error at /Users/ashton/.julia/dev/TrackedFloats/src/TrackedFloat.jl:11
+< at /Users/ashton/.julia/dev/TrackedFloats/src/TrackedFloat.jl:214
+maximum at /Users/ashton/Research/TrackedFloatsExamples/max_example.jl:0
+top-level scope at /Users/ashton/Research/TrackedFloatsExamples/max_example.jl:20
 eval at ./boot.jl:370
 include_string at ./loading.jl:1899
 _include at ./loading.jl:1959
@@ -103,11 +105,11 @@ This tool may be useful for debugging those sorts of issues.
 
 ## Usage
 
- 1. Call `using FloatTracker`; you may want to include functions like `enable_nan_injection` or `config_logger` or the like. (See below for more details.)
+ 1. Call `using TrackedFloats`; you may want to include functions like `enable_nan_injection` or `config_logger` or the like. (See below for more details.)
  2. Add additional customization to logging and injection.
  3. Wrap as many of your inputs in `TrackedFloatN` as you can.
 
-FloatTracker should take care of the rest!
+TrackedFloats should take care of the rest!
 
 Digging into step 2, there are two things that you can customize after initialization:
 
@@ -163,7 +165,7 @@ Keyword arguments for `config_logger`:
 
 ### Configuring the injector
 
-FloatTracker can *inject* `NaN`s at random points in your program to help you find places where you might not be handling exceptional values properly: this technique can help you find `NaN` kills before they happen in a production environment.
+TrackedFloats can *inject* `NaN`s at random points in your program to help you find places where you might not be handling exceptional values properly: this technique can help you find `NaN` kills before they happen in a production environment.
 
 ```julia
 # Inject 2 NaNs
@@ -218,7 +220,7 @@ Most of the time comparison operators are what kill a NaN. But `^` can kill NaNs
 
 # Fuzzing and Recording injections
 
-FloatTracker allows you to fuzz code and inject NaNs or Infs wherever a `TrackedFloat` type is used. Moreover, you can record these injections to rerun injections.
+TrackedFloats allows you to fuzz code and inject NaNs or Infs wherever a `TrackedFloat` type is used. Moreover, you can record these injections to rerun injections.
 
 **WARNING:** it is critical that inputs to the program be exactly the same for recording and replaying to be consistent. The recordings are sensitive to the number of times a floating point operation is hit.
 
@@ -235,7 +237,7 @@ The checks in the purple region cost the most time, so we do those as late as po
 
 Sometimes we want to inject NaNs throughout the program. We can create a "recording session" that will before each injection check if that point has been tried before. If it has, we move on and try again at the next injection point.
 
-We can tell FloatTracker what we consider to be identical injection points. **TODO:** how *do* we tell FloatTracker what we consider to be the same and not the same? Function boundaries?
+We can tell TrackedFloats what we consider to be identical injection points. **TODO:** how *do* we tell TrackedFloats what we consider to be the same and not the same? Function boundaries?
 
 ## Recording internals
 
@@ -247,13 +249,13 @@ Injection points are saved to a *recording file*, where each line denotes an inj
 42, solve.jl, OrdinaryDiffEq::solve OrdinaryDiffEq::do_it Finch::make_it_so
 ```
 
-The first field `42` is the injection point, or the nth time a floating point operation was intercepted by FloatTracker. The second field `solve.jl` acts as a little sanity check: this is the first non-FloatTracker file off of the stack trace. After that comes a list of module names paired with the function on the call stack.
+The first field `42` is the injection point, or the nth time a floating point operation was intercepted by TrackedFloats. The second field `solve.jl` acts as a little sanity check: this is the first non-TrackedFloats file off of the stack trace. After that comes a list of module names paired with the function on the call stack.
 
 # Generating CSTGs
 
 Get the [CSTG](https://github.com/utahplt/cstg) code.
 
-Run a program that uses TrackedFloats (e.g. from the [example repository](https://github.com/utahplt/FloatTrackerExamples)).
+Run a program that uses TrackedFloats (e.g. from the [example repository](https://github.com/utahplt/TrackedFloatsExamples)).
 By default, a file with `*error_log*` in its name should appear.
 
 Generate a graph using the error log:
@@ -272,13 +274,13 @@ For more about CSTG, please see the original paper:
 
 # Examples
 
-Examples have been moved from this repository to an [example repository](https://github.com/utahplt/FloatTrackerExamples)—this allows us to keep the dependencies in this repository nice and light.
+Examples have been moved from this repository to an [example repository](https://github.com/utahplt/TrackedFloatsExamples)—this allows us to keep the dependencies in this repository nice and light.
 
 # Julia and GPU programming
 
-FloatTracker works on the CPU. If a Julia function calls a GPU kernel, then you can track exceptions inside the GPU execution using our companion tool [GPU-FPX](https://github.com/LLNL/GPU-FPX) developed by Xinyi Li for her PhD. This will allow you to (1) see the exception flows inside the kernel, (2) whether the exceptions got killed inside the kernel, and if the exceptions were present in the return result of the Julia GPU call, then (3) FloatTracker will show how that exception further flows through the Julia code. You get this full effect by running your Julia Command under `LD_PRELOAD`. 
+TrackedFloats works on the CPU. If a Julia function calls a GPU kernel, then you can track exceptions inside the GPU execution using our companion tool [GPU-FPX](https://github.com/LLNL/GPU-FPX) developed by Xinyi Li for her PhD. This will allow you to (1) see the exception flows inside the kernel, (2) whether the exceptions got killed inside the kernel, and if the exceptions were present in the return result of the Julia GPU call, then (3) TrackedFloats will show how that exception further flows through the Julia code. You get this full effect by running your Julia Command under `LD_PRELOAD`. 
 
-For details of `LD_PRELOAD` and to obtain and install GPU-FPX, please visit the [GPU-FPX repository](https://github.com/LLNL/GPU-FPX) and ask its authors for assistance if needed. For help on using FloatTracker in conjunction with this tool, talk to us.
+For details of `LD_PRELOAD` and to obtain and install GPU-FPX, please visit the [GPU-FPX repository](https://github.com/LLNL/GPU-FPX) and ask its authors for assistance if needed. For help on using TrackedFloats in conjunction with this tool, talk to us.
 
 # Running tests
 
@@ -293,7 +295,7 @@ or via the Julia shell:
 ```
 julia> ]             # enter the package shell
 pkg> activate .
-(FloatTracker) pkg> test
+(TrackedFloats) pkg> test
 ```
 
 # License
@@ -304,7 +306,7 @@ MIT License
 
 Inspired by [Sherlogs.jl](https://github.com/milankl/Sherlogs.jl).
 
-This repository originally lived in [Taylor Allred's repository](https://github.com/tcallred/FloatTracker.jl).
+This repository originally lived in [Taylor Allred's repository](https://github.com/tcallred/TrackedFloats.jl).
 
 # Citation
 
