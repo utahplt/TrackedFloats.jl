@@ -298,6 +298,10 @@ pkg> activate .
 (TrackedFloats) pkg> test
 ```
 
+# Contributing
+
+Please report bugs on the [TrackedFloats issue tracker on GitHub](https://github.com/utahplt/TrackedFloats.jl/issues). Likewise, if you wish to make a code contribution, please fork the repository and open a pull-request on GitHub.
+
 # License
 
 MIT License
