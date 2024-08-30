@@ -33,7 +33,7 @@ function tf_flush_logs()
   end
 end
 
-function print_log()
+function tf_print_log()
   for e in log_buffer.events
     println(e)
   end

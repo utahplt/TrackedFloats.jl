@@ -11,13 +11,13 @@ using TrackedFloats
   mirror.ses.sessionId = global_config.ses.sessionId
   @test "$global_config" == "$mirror"
 
-  config_injector(active=true, odds=42)
+  tf_config_injector(active=true, odds=42)
   @test "$global_config" != "$mirror"
   mirror.inj.active = true
   mirror.inj.odds = 42
   @test "$global_config" == "$mirror"
 
-  config_injector(active=false)
+  tf_config_injector(active=false)
   @test "$global_config" != "$mirror"
   mirror.inj.active = false
   @test "$global_config" == "$mirror"

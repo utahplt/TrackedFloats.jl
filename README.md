@@ -181,7 +181,7 @@ record_injection("tf_recording") # this is just the file basename; will have tim
 replay_injection("20230530T145830-tf_recording.txt")
 ```
 
-Keyword arguments for `config_injector`:
+Keyword arguments for `tf_config_injector`:
 
  - `active::Boolean` inject only if true
 

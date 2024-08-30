@@ -277,8 +277,8 @@ tf_config_logger(log::LoggerConfig) = tf_config.log = log
 tf_config_logger(; args...) = patch_config!(tf_config.log; args...)
 
 """
-    config_injector(log::InjectorConfig)
-    config_injector(; args...)
+    tf_config_injector(log::InjectorConfig)
+    tf_config_injector(; args...)
 
 Set the injector for the global TrackedFloats configuration instance.
 
@@ -288,8 +288,8 @@ Takes either a `InjectorConfig` struct, or the same keyword arguments as the
 Passing a partial list of keyword arguments has the same behavior as it does
 with `tf_config_logger`.
 """
-config_injector(inj::InjectorConfig) = tf_config.inj = inj
-config_injector(; args...) = patch_config!(tf_config.inj; args...)
+tf_config_injector(inj::InjectorConfig) = tf_config.inj = inj
+tf_config_injector(; args...) = patch_config!(tf_config.inj; args...)
 
 """
     config_session(log::SessionConfig)
@@ -303,8 +303,8 @@ Takes either a `SessionConfig` struct, or the same keyword arguments as the
 Passing a partial list of keyword arguments has the same behavior as it does
 with `tf_config_logger`.
 """
-config_session(ses::SessionConfig) = tf_config.ses = ses
-config_session(; args...) = patch_config!(tf_config.ses; args...)
+tf_config_session(ses::SessionConfig) = tf_config.ses = ses
+tf_config_session(; args...) = patch_config!(tf_config.ses; args...)
 
 """
     tf_exclude_stacktrace(exclusions = [:prop])
@@ -331,11 +331,11 @@ Turn on NaN injection. Optionally configure the odds for injection, as well as
 the number of NaNs to inject, and the functions/libraries in which to inject
 NaNs. Overrides unspecified arguments to their defaults.
 """
-function enable_nan_injection(n_inject::Int)
+function tf_enable_nan_injection(n_inject::Int)
   enable_injection(n_inject, NaN)
 end
 
-function enable_inf_injection(n_inject::Int)
+function tf_enable_inf_injection(n_inject::Int)
   enable_injection(n_inject, Inf)
 end
 
@@ -345,13 +345,13 @@ function enable_injection(n_inject::Int, value::Any)
   tf_config.inj.value = value
 end
 
-function enable_nan_injection(; odds::Int = 10, n_inject::Int = 1,
+function tf_enable_nan_injection(; odds::Int = 10, n_inject::Int = 1,
                                functions::Array{FunctionRef} = FunctionRef[],
                                libraries::Array{String} = String[])
   enable_injection(value=NaN, odds=odds, n_inject=n_inject, functions=functions, libraries=libraries)
 end
 
-function enable_inf_injection(; odds::Int = 10, n_inject::Int = 1,
+function tf_enable_inf_injection(; odds::Int = 10, n_inject::Int = 1,
                                functions::Array{FunctionRef} = FunctionRef[],
                                libraries::Array{String} = String[])
   enable_injection(value=Inf, odds=odds, n_inject=n_inject, functions=functions, libraries=libraries)
@@ -377,8 +377,8 @@ Turn off NaN injection.
 If you want to re-enable NaN injection after calling `disable_nan_injection`,
 consider using the one-argument form of `enable_nan_injection(n_inject::Int)`.
 """
-disable_nan_injection() = tf_config.inj.active = false
-disable_inf_injection() = tf_config.inj.active = false
+tf_disable_nan_injection() = tf_config.inj.active = false
+tf_disable_inf_injection() = tf_config.inj.active = false
 disable_injection() = tf_config.inj.active = false
 
 """
@@ -386,7 +386,7 @@ disable_injection() = tf_config.inj.active = false
 
 Turn on recording.
 """
-record_injection(recording_file::String="tf_recording") = tf_config.inj.record = recording_file
+tf_record_injection(recording_file::String="tf_recording") = tf_config.inj.record = recording_file
 
 """
     replay_injection(replay_file::String)
@@ -397,4 +397,4 @@ Note that this overwrites all previous configuration to the injector file, as
 once you are replaying an injection recording, all other configuration ceases to
 matter.
 """
-replay_injection(replay_file::String) = tf_config.inj = InjectorConfig(replay=replay_file)
+tf_replay_injection(replay_file::String) = tf_config.inj = InjectorConfig(replay=replay_file)
