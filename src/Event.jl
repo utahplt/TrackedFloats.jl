@@ -44,7 +44,7 @@ function event(op, args, result, is_injected = false) :: Vector{Event}
         continue                # no events generated for this category (nan vs inf)
       end
 
-    st = if evt_type in ft_config.log.exclusions
+    st = if evt_type in tf_config.log.exclusions
       Base.StackFrame[]
     else
       stacktrace()[2:end]

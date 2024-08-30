@@ -21,7 +21,7 @@ num = TrackedFloat64(-42.0)
 should_be_nan = sqrt(num)
 
 # Flush TrackedFloats's logs
-ft_flush_logs()
+tf_flush_logs()
 ```
 
 # Description
@@ -50,7 +50,7 @@ JuliaCon 2023 talk by Ashton:
 ```julia
 using TrackedFloats
 
-config_logger(filename="max")
+tf_config_logger(filename="max")
 
 function maximum(lst)
   max_seen = 0.0
@@ -75,7 +75,7 @@ println("--- With builtin max ---")
 res2 = maximum2(TrackedFloat32.([1, 5, 4, NaN, 4])).val
 println("Result: $(res2)")
 
-ft_flush_logs()
+tf_flush_logs()
 ```
 
 This code shows two different implementations of a max-element function.
@@ -105,7 +105,7 @@ This tool may be useful for debugging those sorts of issues.
 
 ## Usage
 
- 1. Call `using TrackedFloats`; you may want to include functions like `enable_nan_injection` or `config_logger` or the like. (See below for more details.)
+ 1. Call `using TrackedFloats`; you may want to include functions like `enable_nan_injection` or `tf_config_logger` or the like. (See below for more details.)
  2. Add additional customization to logging and injection.
  3. Wrap as many of your inputs in `TrackedFloatN` as you can.
 
@@ -126,7 +126,7 @@ Digging into step 2, there are two things that you can customize after initializ
 
 ```julia
 # Set log file basename to "whatever"; all log files have the timestamp prepended
-config_logger(filename="whatever")
+tf_config_logger(filename="whatever")
 
 # There are three kinds of events that we log:
 #  - `:gen`  → when a NaN gets created from non-NaN arguments
@@ -135,10 +135,10 @@ config_logger(filename="whatever")
 #
 # If logs are too noisy, we can disable some or all of the logs. For example,
 # here we disable everything but NaN generation logging:
-exclude_stacktrace([:prop,:kill])
+tf_exclude_stacktrace([:prop,:kill])
 ```
 
-Keyword arguments for `config_logger`:
+Keyword arguments for `tf_config_logger`:
 
  - `filename::String` Basename of the file to write logs to.
 
@@ -175,10 +175,10 @@ enable_nan_injection(2)
 enable_nan_injection(n_inject=2, functions=[FunctionRef("nope", "way.jl")])
 
 # Enable recording of injections
-record_injection("ft_recording") # this is just the file basename; will have timestamp prepended
+record_injection("tf_recording") # this is just the file basename; will have timestamp prepended
 
 # Enable recording playback
-replay_injection("20230530T145830-ft_recording.txt")
+replay_injection("20230530T145830-tf_recording.txt")
 ```
 
 Keyword arguments for `config_injector`:

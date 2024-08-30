@@ -48,8 +48,8 @@ end
 export should_inject            # only for testing
 
 function make_replay_point(i::InjectorConfig, st::StackTraces.StackTrace)::ReplayPoint
-  this_file = frame_file(drop_ft_frames(st)[1])
-  short_frames = map((f -> "$(frame_library(f)):$(frame_file(f)):$(frame_line(f))"), drop_ft_frames(st))
+  this_file = frame_file(drop_tf_frames(st)[1])
+  short_frames = map((f -> "$(frame_library(f)):$(frame_file(f)):$(frame_line(f))"), drop_tf_frames(st))
   ReplayPoint(i.place_counter, i.value, Symbol(this_file), short_frames)
 end
 
@@ -70,7 +70,7 @@ function handle_replay(i::InjectorConfig)::Bool
     return false
   end
 
-  ff = frame_file(drop_ft_frames(stacktrace())[1])
+  ff = frame_file(drop_tf_frames(stacktrace())[1])
 
   # Match?
   if place === script[head].counter && ff === script[head].check
@@ -91,7 +91,7 @@ end
   i.n_inject = i.n_inject - 1
 end
 
-@inline function drop_ft_frames(frames)
+@inline function drop_tf_frames(frames)
   collect(Iterators.dropwhile((frame -> frame_library(frame) === "TrackedFloats"), frames))
 end
 
@@ -103,7 +103,7 @@ StackTrace) is a valid point to inject.
 """
 function injectable_region(i::InjectorConfig, raw_frames::StackTraces.StackTrace)::Bool
   # Drop TrackedFloats frames
-  frames = drop_ft_frames(raw_frames)
+  frames = drop_tf_frames(raw_frames)
 
   # If neither functions nor libraries are specified, inject as long as we're
   # not inside the standard library.

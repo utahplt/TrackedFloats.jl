@@ -9,26 +9,26 @@ log_buffer = LogBuffer([])
 function log_event(evt::Event)
   push!(log_buffer.events, evt)
 
-  if ft_config.log.printToStdOut
+  if tf_config.log.printToStdOut
     println(to_string(evt))
   end
-  if length(log_buffer.events) >= ft_config.log.buffersize
-    if isa(ft_config.log.maxLogs, Unbounded) || (isa(ft_config.log.maxLogs, Int) && ft_config.log.maxLogs > 0)
-      ft_flush_logs()
-      if isa(ft_config.log.maxLogs, Int)
-        ft_config.log.maxLogs -= length(log_buffer.events)
+  if length(log_buffer.events) >= tf_config.log.buffersize
+    if isa(tf_config.log.maxLogs, Unbounded) || (isa(tf_config.log.maxLogs, Int) && tf_config.log.maxLogs > 0)
+      tf_flush_logs()
+      if isa(tf_config.log.maxLogs, Int)
+        tf_config.log.maxLogs -= length(log_buffer.events)
       end
     end
     log_buffer.events = []
   end
 end
 
-function ft_flush_logs()
-  if ft_config.log.allErrors
+function tf_flush_logs()
+  if tf_config.log.allErrors
     write_error_logs()
   end
 
-  if ft_config.log.cstg
+  if tf_config.log.cstg
     write_logs_for_cstg()
   end
 end
@@ -80,20 +80,20 @@ end
 function format_cstg_stackframe(sf::StackTraces.StackFrame, frame_args::Vector{} = [])
   func = String(sf.func)        # FIXME/TODO: can we make sure the function name here is well-formed for CSTG's digestion?
   linfo = "$(sf.linfo)"
-  args = if ft_config.log.cstgArgs && isempty(frame_args)
+  args = if tf_config.log.cstgArgs && isempty(frame_args)
     if isa(sf.linfo, Core.CodeInfo)
       "$(sf.linfo.code[1])"
     else
       mx = match(r"^.+\((.*?)\)", linfo)
       "($(!isnothing(mx) && length(mx) > 0 ? mx[1] : ""))"
     end
-  elseif ft_config.log.cstgArgs
+  elseif tf_config.log.cstgArgs
     "($frame_args)"
   else
     ""
   end
 
-  linenum = if ft_config.log.cstgLineNum
+  linenum = if tf_config.log.cstgLineNum
     ":$(sf.line)"
   else
     ""
@@ -120,7 +120,7 @@ function write_events(file, events::Vector{Event})
       write(file, "[$(category(e))] $(format_cstg_stackframe(e.trace[1], e.args))\n")
 
       # write remaining frames up to ftv-config.log.maxFrames
-      for sf in e.trace[(isa(ft_config.log.maxFrames, Unbounded) ? (2:end) : (2:(ft_config.log.maxFrames + 1)))]
+      for sf in e.trace[(isa(tf_config.log.maxFrames, Unbounded) ? (2:end) : (2:(tf_config.log.maxFrames + 1)))]
         write(file, "$(format_cstg_stackframe(sf))\n")
       end
 

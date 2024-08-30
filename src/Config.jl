@@ -68,44 +68,44 @@ LoggerConfig(filename, buff_size) =
 LoggerConfig(filename, buff_size, cstg) =
   LoggerConfig(filename=filename, buffersize=buff_size, print=false, cstg=cstg, cstgLineNum=true, cstgArgs=true)
 
-function LoggerConfig(; filename="ft_log", buffersize=1000, print=false, cstg=true, cstgLineNum=true, cstgArgs=false,
+function LoggerConfig(; filename="tf_log", buffersize=1000, print=false, cstg=true, cstgLineNum=true, cstgArgs=false,
                       maxLogs=Unbounded(), maxFrames=Unbounded(), exclusions=[:prop], allErrors=false)
   LoggerConfig(filename, buffersize, print, allErrors, cstg, cstgLineNum, cstgArgs, maxLogs, maxFrames, exclusions)
 end
 
 function injects_file()
-  if ft_config.ses.testing
-    ft_config.log.filename
+  if tf_config.ses.testing
+    tf_config.log.filename
   else
-    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_injects.txt"
+    "$(tf_config.ses.sessionId)-$(tf_config.log.filename)_cstg_injects.txt"
   end
 end
 function gens_file()
-  if ft_config.ses.testing
-    ft_config.log.filename
+  if tf_config.ses.testing
+    tf_config.log.filename
   else
-    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_gens.txt"
+    "$(tf_config.ses.sessionId)-$(tf_config.log.filename)_cstg_gens.txt"
   end
 end
 function props_file()
-  if ft_config.ses.testing
-    ft_config.log.filename
+  if tf_config.ses.testing
+    tf_config.log.filename
   else
-    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_props.txt"
+    "$(tf_config.ses.sessionId)-$(tf_config.log.filename)_cstg_props.txt"
   end
 end
 function kills_file()
-  if ft_config.ses.testing
-    ft_config.log.filename
+  if tf_config.ses.testing
+    tf_config.log.filename
   else
-    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_cstg_kills.txt"
+    "$(tf_config.ses.sessionId)-$(tf_config.log.filename)_cstg_kills.txt"
   end
 end
 function errors_file()
-  if ft_config.ses.testing
-    ft_config.log.filename
+  if tf_config.ses.testing
+    tf_config.log.filename
   else
-    "$(ft_config.ses.sessionId)-$(ft_config.log.filename)_error_log.txt"
+    "$(tf_config.ses.sessionId)-$(tf_config.log.filename)_error_log.txt"
   end
 end
 
@@ -234,19 +234,19 @@ end
 # Global config instance
 #
 
-# Don't forget to call `ft_init()`!!!
-ft_config = nothing
+# Don't forget to call `tf_init()`!!!
+tf_config = nothing
 
 """
-    ft_init()
+    tf_init()
 
 Initialize the global TrackedFloats configuration. (Automatically called when using function by `__init__`)
 
 We need to make this a function, otherwise it can cache the value of the
 timestamp used for writing unique log files.
 """
-function ft_init()
-  global ft_config = FtConfig(LoggerConfig(), InjectorConfig(), SessionConfig())
+function tf_init()
+  global tf_config = FtConfig(LoggerConfig(), InjectorConfig(), SessionConfig())
 end
 
 # Internal function
@@ -257,12 +257,12 @@ function patch_config!(the_struct; kwargs ...)
 end
 
 # Exported only for testing
-ft__get_global_ft_config_for_test() = ft_config
-export ft__get_global_ft_config_for_test
+tf__get_global_tf_config_for_test() = tf_config
+export tf__get_global_tf_config_for_test
 
 """
-    config_logger(log::LoggerConfig)
-    config_logger(; args...)
+    tf_config_logger(log::LoggerConfig)
+    tf_config_logger(; args...)
 
 Set the logger for the global TrackedFloats configuration instance.
 
@@ -273,8 +273,8 @@ In the case where only a few arguments are specified, it will override only
 those fields, i.e. the entire LoggerConfig won't be replaced. This is useful,
 for example, if you need to adjust a field in the middle of a test.
 """
-config_logger(log::LoggerConfig) = ft_config.log = log
-config_logger(; args...) = patch_config!(ft_config.log; args...)
+tf_config_logger(log::LoggerConfig) = tf_config.log = log
+tf_config_logger(; args...) = patch_config!(tf_config.log; args...)
 
 """
     config_injector(log::InjectorConfig)
@@ -286,10 +286,10 @@ Takes either a `InjectorConfig` struct, or the same keyword arguments as the
 `InjectorConfig` constructor.
 
 Passing a partial list of keyword arguments has the same behavior as it does
-with `config_logger`.
+with `tf_config_logger`.
 """
-config_injector(inj::InjectorConfig) = ft_config.inj = inj
-config_injector(; args...) = patch_config!(ft_config.inj; args...)
+config_injector(inj::InjectorConfig) = tf_config.inj = inj
+config_injector(; args...) = patch_config!(tf_config.inj; args...)
 
 """
     config_session(log::SessionConfig)
@@ -301,13 +301,13 @@ Takes either a `SessionConfig` struct, or the same keyword arguments as the
 `SessionConfig` constructor.
 
 Passing a partial list of keyword arguments has the same behavior as it does
-with `config_logger`.
+with `tf_config_logger`.
 """
-config_session(ses::SessionConfig) = ft_config.ses = ses
-config_session(; args...) = patch_config!(ft_config.ses; args...)
+config_session(ses::SessionConfig) = tf_config.ses = ses
+config_session(; args...) = patch_config!(tf_config.ses; args...)
 
 """
-    exclude_stacktrace(exclusions = [:prop])
+    tf_exclude_stacktrace(exclusions = [:prop])
 
 Globally set the types of stack traces to not collect.
 
@@ -315,9 +315,9 @@ See documentation for the `event()` function for details on the types of events
 that can be put into this list.
 
 Convenience function; You can also set the stack trace exclusions with
-a keyword argument to `config_logger`.
+a keyword argument to `tf_config_logger`.
 """
-exclude_stacktrace(exclusions = [:prop]) = ft_config.log.exclusions = exclusions
+tf_exclude_stacktrace(exclusions = [:prop]) = tf_config.log.exclusions = exclusions
 
 """
     enable_nan_injection(n_inject::Int)
@@ -340,9 +340,9 @@ function enable_inf_injection(n_inject::Int)
 end
 
 function enable_injection(n_inject::Int, value::Any)
-  ft_config.inj.active = true
-  ft_config.inj.n_inject      = n_inject
-  ft_config.inj.value = value
+  tf_config.inj.active = true
+  tf_config.inj.n_inject      = n_inject
+  tf_config.inj.value = value
 end
 
 function enable_nan_injection(; odds::Int = 10, n_inject::Int = 1,
@@ -361,12 +361,12 @@ function enable_injection(; odds::Int = 10, n_inject::Int = 1, value::Any = NaN,
                             functions::Array{FunctionRef} = FunctionRef[],
                             libraries::Array{String} = String[])
 
-  ft_config.inj.active = true
-  ft_config.inj.value = value
-  ft_config.inj.odds          = odds
-  ft_config.inj.n_inject      = n_inject
-  ft_config.inj.functions     = functions
-  ft_config.inj.libraries     = libraries
+  tf_config.inj.active = true
+  tf_config.inj.value = value
+  tf_config.inj.odds          = odds
+  tf_config.inj.n_inject      = n_inject
+  tf_config.inj.functions     = functions
+  tf_config.inj.libraries     = libraries
 end
 
 """
@@ -377,16 +377,16 @@ Turn off NaN injection.
 If you want to re-enable NaN injection after calling `disable_nan_injection`,
 consider using the one-argument form of `enable_nan_injection(n_inject::Int)`.
 """
-disable_nan_injection() = ft_config.inj.active = false
-disable_inf_injection() = ft_config.inj.active = false
-disable_injection() = ft_config.inj.active = false
+disable_nan_injection() = tf_config.inj.active = false
+disable_inf_injection() = tf_config.inj.active = false
+disable_injection() = tf_config.inj.active = false
 
 """
-    record_injection(recording_file::String="ft_recording")
+    record_injection(recording_file::String="tf_recording")
 
 Turn on recording.
 """
-record_injection(recording_file::String="ft_recording") = ft_config.inj.record = recording_file
+record_injection(recording_file::String="tf_recording") = tf_config.inj.record = recording_file
 
 """
     replay_injection(replay_file::String)
@@ -397,4 +397,4 @@ Note that this overwrites all previous configuration to the injector file, as
 once you are replaying an injection recording, all other configuration ceases to
 matter.
 """
-replay_injection(replay_file::String) = ft_config.inj = InjectorConfig(replay=replay_file)
+replay_injection(replay_file::String) = tf_config.inj = InjectorConfig(replay=replay_file)

@@ -1,7 +1,7 @@
 module TrackedFloats
 
-export FtConfig, ft_init, TrackedFloat16, TrackedFloat32, TrackedFloat64, FunctionRef
-export LoggerConfig, config_logger, exclude_stacktrace, print_log, ft_flush_logs
+export FtConfig, tf_init, TrackedFloat16, TrackedFloat32, TrackedFloat64, FunctionRef
+export LoggerConfig, tf_config_logger, tf_exclude_stacktrace, print_log, tf_flush_logs
 export InjectorConfig, config_injector, enable_nan_injection, disable_nan_injection, enable_inf_injection, disable_inf_injection, record_injection, replay_injection
 export SessionConfig, config_session
 
@@ -12,7 +12,7 @@ include("Logger.jl")            # Formatting and writing of error/event logs
 include("Injector.jl")          # NaN-injection logic
 include("TrackedFloat.jl")      # Principle datatype; overrides of all Base.* functions
 
-# Call ft_init() when module gets loaded up
-__init__() = ft_init()
+# Call tf_init() when module gets loaded up
+__init__() = tf_init()
 
 end

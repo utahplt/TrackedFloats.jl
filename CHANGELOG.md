@@ -22,7 +22,7 @@ We are pretty happy with where the API is at this point, and we want to release 
 
 ### Changed
 
- - Rename `write_out_logs` → `ft_flush_logs`.
+ - Rename `write_out_logs` → `tf_flush_logs`.
 
 ## 0.5.1
 
@@ -91,7 +91,7 @@ Massive configuration API rewrite. This should make it easier to maintain and ex
 
  - `enable_nan_injection!(n_inject = 1)`
  - `disable_nan_injection!()`
- - `enable_injection_recording!(recording_file::String = "ft_recording")`
+ - `enable_injection_recording!(recording_file::String = "tf_recording")`
  - `set_injection_replay!(replay_file::String)`
 
 ### Replaced functions

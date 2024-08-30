@@ -1,7 +1,7 @@
 # Run this by entering the Julia REPL and running
    # include("test/logger_perf_tests.jl")
 
-using TrackedFloats: TrackedFloat64, ft_flush_logs, exclude_stacktrace, set_logger
+using TrackedFloats: TrackedFloat64, tf_flush_logs, tf_exclude_stacktrace, set_logger
 using FileIO, Profile, FlameGraphs, Plots, ProfileView
 
 function track(loops)
@@ -33,7 +33,7 @@ end
 loops = 50_000
 
 set_logger(filename="log_perf", buffersize=10_000)
-exclude_stacktrace([:prop,:kill])
+tf_exclude_stacktrace([:prop,:kill])
 
 no_track(1)
 track(1)

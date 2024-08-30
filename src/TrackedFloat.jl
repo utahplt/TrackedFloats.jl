@@ -3,20 +3,20 @@ abstract type AbstractTrackedFloat <: AbstractFloat end
 @inline function check_error(fn, injected::Bool, result, args...)
   if any(v -> isfloaterror(v), [args..., result])
     # args is a tuple; we call `collect` to get a Vector without promoting the types
-    if isa(ft_config.log.maxLogs, Int) && ft_config.log.maxLogs > 0
+    if isa(tf_config.log.maxLogs, Int) && tf_config.log.maxLogs > 0
       # We do not decrement at this point: that happens in the logger so we get
       # the right amount of logs of the *kind* that we want.
       map(log_event, event(string(fn), collect(args), result, injected))
-    elseif isa(ft_config.log.maxLogs, Unbounded)
+    elseif isa(tf_config.log.maxLogs, Unbounded)
       map(log_event, event(string(fn), collect(args), result, injected))
     end
   end
 end
 
 @inline function run_or_inject(fn, args...)
-  if should_inject(ft_config.inj)
-    decrement_injections(ft_config.inj)
-    (ft_config.inj.value, true)
+  if should_inject(tf_config.inj)
+    decrement_injections(tf_config.inj)
+    (tf_config.inj.value, true)
   else
     (fn(args...), false)
   end

@@ -16,11 +16,11 @@ end
 end
 
 @testset "events get recorded" begin
-  ft_init()
+  tf_init()
   config_session(testing=true)
   tmp1 = tempname()         # This should automatically get cleaned up
-  exclude_stacktrace([:kill,:inject])
-  config_logger(filename=tmp1, buffersize=1, maxFrames=3)
+  tf_exclude_stacktrace([:kill,:inject])
+  tf_config_logger(filename=tmp1, buffersize=1, maxFrames=3)
 
   scotty_tt = TrackedFloat64(0.0 + 1.0im) / 0
 
