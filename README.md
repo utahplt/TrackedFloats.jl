@@ -1,6 +1,6 @@
-# TrackedFloats.jl (formerly FloatTracker.jl)
+# TrackedFloats.jl
 
-⚠️ **NOTICE** ⚠️ we are in the process of renaming FloatTracker → TrackedFloats to bring this inline with Julia package naming conventions. Please be patient.
+(formerly FloatTracker.jl)
 
 [![CI](https://github.com/utahplt/TrackedFloats.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/utahplt/TrackedFloats.jl/actions/workflows/CI.yml)
 
