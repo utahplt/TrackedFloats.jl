@@ -320,12 +320,12 @@ a keyword argument to `tf_config_logger`.
 tf_exclude_stacktrace(exclusions = [:prop]) = tf_config.log.exclusions = exclusions
 
 """
-    enable_nan_injection(n_inject::Int)
+    tf_enable_nan_injection(n_inject::Int)
 
 Turn on NaN injection and injection `n_inject` NaNs. Does not modify odds,
 function and library lists, or recording/replay state.
 
-    enable_nan_injection(; odds::Int = 10, n_inject::Int = 1, functions::Array{FunctionRef} = [], libraries::Array{String} = [])
+    tf_enable_nan_injection(; odds::Int = 10, n_inject::Int = 1, functions::Array{FunctionRef} = [], libraries::Array{String} = [])
 
 Turn on NaN injection. Optionally configure the odds for injection, as well as
 the number of NaNs to inject, and the functions/libraries in which to inject
@@ -370,26 +370,26 @@ function enable_injection(; odds::Int = 10, n_inject::Int = 1, value::Any = NaN,
 end
 
 """
-    disable_nan_injection()
+    tf_disable_nan_injection()
 
 Turn off NaN injection.
 
-If you want to re-enable NaN injection after calling `disable_nan_injection`,
-consider using the one-argument form of `enable_nan_injection(n_inject::Int)`.
+If you want to re-enable NaN injection after calling `tf_disable_nan_injection`,
+consider using the one-argument form of `tf_enable_nan_injection(n_inject::Int)`.
 """
 tf_disable_nan_injection() = tf_config.inj.active = false
 tf_disable_inf_injection() = tf_config.inj.active = false
 disable_injection() = tf_config.inj.active = false
 
 """
-    record_injection(recording_file::String="tf_recording")
+    tf_record_injection(recording_file::String="tf_recording")
 
 Turn on recording.
 """
 tf_record_injection(recording_file::String="tf_recording") = tf_config.inj.record = recording_file
 
 """
-    replay_injection(replay_file::String)
+    tf_reply_injection(replay_file::String)
 
 Sets the injector to read from a replay file.
 

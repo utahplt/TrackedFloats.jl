@@ -105,7 +105,7 @@ This tool may be useful for debugging those sorts of issues.
 
 ## Usage
 
- 1. Call `using TrackedFloats`; you may want to include functions like `enable_nan_injection` or `tf_config_logger` or the like. (See below for more details.)
+ 1. Call `using TrackedFloats`; you may want to include functions like `tf_enable_nan_injection` or `tf_config_logger` or the like. (See below for more details.)
  2. Add additional customization to logging and injection.
  3. Wrap as many of your inputs in `TrackedFloatN` as you can.
 
@@ -169,16 +169,16 @@ TrackedFloats can *inject* `NaN`s at random points in your program to help you f
 
 ```julia
 # Inject 2 NaNs
-enable_nan_injection(2)
+tf_enable_nan_injection(2)
 
 # Inject 2 NaNs, except when in the function "nope" in "way.jl"
-enable_nan_injection(n_inject=2, functions=[FunctionRef("nope", "way.jl")])
+tf_enable_nan_injection(n_inject=2, functions=[FunctionRef("nope", "way.jl")])
 
 # Enable recording of injections
-record_injection("tf_recording") # this is just the file basename; will have timestamp prepended
+tf_record_injection("tf_recording") # this is just the file basename; will have timestamp prepended
 
 # Enable recording playback
-replay_injection("20230530T145830-tf_recording.txt")
+tf_reply_injection("20230530T145830-tf_recording.txt")
 ```
 
 Keyword arguments for `tf_config_injector`:
