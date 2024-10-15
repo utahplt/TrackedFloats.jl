@@ -292,8 +292,8 @@ tf_config_injector(inj::InjectorConfig) = tf_config.inj = inj
 tf_config_injector(; args...) = patch_config!(tf_config.inj; args...)
 
 """
-    config_session(log::SessionConfig)
-    config_session(; args...)
+    tf_config_session(log::SessionConfig)
+    tf_config_session(; args...)
 
 Set the session for the global TrackedFloats configuration instance.
 

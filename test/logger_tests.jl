@@ -18,7 +18,7 @@ f0(n) = f1((n * n - 4.0) / (n - 2.0))
 
 @testset "maxFrames: only print out n stack frames" begin
   tf_init()
-  config_session(testing=true)
+  tf_config_session(testing=true)
   tmp1 = tempname()         # This should automatically get cleaned up
   tmp2 = tempname()
 
@@ -44,7 +44,7 @@ end
 
 @testset "maxLogs: only log n events then stop" begin
   tf_init()
-  config_session(testing=true)
+  tf_config_session(testing=true)
   tmp1 = tempname()         # This should automatically get cleaned up
   tmp2 = tempname()
 

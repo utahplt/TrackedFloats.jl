@@ -17,7 +17,7 @@ end
 
 @testset "events get recorded" begin
   tf_init()
-  config_session(testing=true)
+  tf_config_session(testing=true)
   tmp1 = tempname()         # This should automatically get cleaned up
   tf_exclude_stacktrace([:kill,:inject])
   tf_config_logger(filename=tmp1, buffersize=1, maxFrames=3)
