@@ -4,6 +4,14 @@ We strive to follow [SemVer](https://semver.org/) conventions. Per [item 4 in th
 
 That said, this is research software, so expect some instability as we aim first and foremost to push the boundaries of what is possible.
 
+## 2.1.0
+
+Update exported function names to all have `tf_` as a prefix.
+
+## 2.0.0
+
+Big name change `FloatTracker` → `TrackedFloats`.
+
 ## 1.0.1
 
 Enable Inf injection (issue [#41](https://github.com/utahplt/TrackedFloats.jl/issues/41))
